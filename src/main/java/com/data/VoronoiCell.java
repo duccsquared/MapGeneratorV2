@@ -1,15 +1,14 @@
 package com.data;
 
-import java.util.Set;
+import java.util.List;
 
 public class VoronoiCell extends Polygon {
-    public VoronoiCell(Set<Point> points, Set<Edge> edges) {
-        this.setPoints(points);
-        this.setEdges(edges);
+    public VoronoiCell(List<Point> points, List<Edge> edges) {
+        super(points,edges);
         
         // add this cell to the edges
         for (Edge edge : this.getEdges()) {
-            edge.getPolygons().add(this);
+            edge.addPolygon(this);
         }
     }
 }

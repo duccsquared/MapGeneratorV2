@@ -2,26 +2,25 @@ package com.data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
-import lombok.*;
-
-@Getter
 public class Edge {
-    private Set<Point> points;
-    private List<Polygon> polygons;
+    private OrderedUniqueList<Point> points;
+    private OrderedUniqueList<Polygon> polygons;
 
     public Edge(Point p1, Point p2) {
         // define variables
-        this.points = new HashSet<>();
-        this.polygons = new ArrayList<>();
+        this.points = new OrderedUniqueList<>();
+        this.polygons = new OrderedUniqueList<>();
+        // sanity checking points
+        if(p1==p2) {
+            throw new IllegalArgumentException("Edge points can't use the same points");
+        }
         // add points
         this.points.add(p1);
         this.points.add(p2);
         // add self to points
-        p1.getEdges().add(this);
-        p2.getEdges().add(this);
+        p1.addEdge(this);
+        p2.addEdge(this);
     }
 
     public Point other(Point point) {
@@ -34,25 +33,26 @@ public class Edge {
         return null;
     }
 
-    public List<Point> getPointList() {
-        // convert to list, then return
-        List<Point> pointList = new ArrayList<>();
-        pointList.addAll(this.getPoints());
-        return pointList;
-    }
+    public Point getP1() {return this.points.get(0);}
+    public Point getP2() {return this.points.get(1);}
 
-    public List<Polygon> getPolygonList() {
-        // convert to list, then return
-        List<Polygon> triangeList = new ArrayList<>();
-        triangeList.addAll(this.polygons);
-        return triangeList;
-    }
+    public List<Point> getPoints() {return this.points.getImmutableList();}
+    public List<Polygon> getPolygons() {return this.polygons.getImmutableList();}
 
+    public boolean addPolygon(Polygon polygon) {
+        // if(this.polygons.size()>=2) {
+        //     throw new IllegalStateException("Edges can only have a maximum of two polygons");
+        // }
+        return this.polygons.add(polygon);
+    }
+    public boolean removePolygon(Polygon polygon) {
+        return this.polygons.remove(polygon);
+    }
 
     public void delete(boolean removePoints) {
         // remove self from edges
         for(Point point: this.points) {
-            point.getEdges().remove(this);
+            point.removeEdge(this);
             // delete points
             if(removePoints) {
                 point.delete();

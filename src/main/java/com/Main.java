@@ -1,7 +1,5 @@
 package com;
 
-import java.util.List;
-
 import com.data.DelaunayGraph;
 import com.data.Edge;
 import com.data.Point;
@@ -27,8 +25,7 @@ public class Main extends Application {
 
 
         for(Edge edge: delaunayGraph.getEdges()) {
-            List<Point> pp = edge.getPointList();
-            Line line = new Line(pp.get(0).getX(),pp.get(0).getY(),pp.get(1).getX(),pp.get(1).getY());
+            Line line = new Line(edge.getP1().getX(),edge.getP1().getY(),edge.getP2().getX(),edge.getP2().getY());
             line.setStroke(Color.LIGHTGRAY);
             pane.getChildren().add(line);
         }
@@ -38,8 +35,7 @@ public class Main extends Application {
 
 
         for(Edge edge: voronoiGraph.getEdges()) {
-            List<Point> pp = edge.getPointList();
-            Line line = new Line(pp.get(0).getX(),pp.get(0).getY(),pp.get(1).getX(),pp.get(1).getY());
+            Line line = new Line(edge.getP1().getX(),edge.getP1().getY(),edge.getP2().getX(),edge.getP2().getY());
             line.setStroke(Color.BLACK);
             pane.getChildren().add(line);
         }

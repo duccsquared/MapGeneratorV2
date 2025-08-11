@@ -1,7 +1,5 @@
 package com.data;
 
-import java.util.List;
-
 import lombok.*;
 
 @Data
@@ -12,13 +10,12 @@ public class Circumcircle {
     private double radius;
     public Circumcircle(Triangle triangle) {
         // get triangle's points
-        List<Point> pp = triangle.getPointList();
-        double ax = pp.get(0).getX();
-        double ay = pp.get(0).getY();
-        double bx = pp.get(1).getX();
-        double by = pp.get(1).getY();
-        double cx = pp.get(2).getX();
-        double cy = pp.get(2).getY();
+        double ax = triangle.getP1().getX();
+        double ay = triangle.getP1().getY();
+        double bx = triangle.getP2().getX();
+        double by = triangle.getP2().getY();
+        double cx = triangle.getP3().getX();
+        double cy = triangle.getP3().getY();
 
         // initial calculations
         double d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));

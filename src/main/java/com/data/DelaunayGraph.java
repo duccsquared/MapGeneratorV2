@@ -67,11 +67,10 @@ public class DelaunayGraph {
 
             // --- step 1: create initial super triangle ---
             Triangle superTriangle = createSuperTriangle(this.width*3, this.height*3);
-            List<Point> pp = superTriangle.getPointList();
             // set names for debug purposes
-            pp.get(0).setName("ST1");
-            pp.get(1).setName("ST2");
-            pp.get(2).setName("ST3");
+            superTriangle.getP1().setName("ST1");
+            superTriangle.getP2().setName("ST2");
+            superTriangle.getP3().setName("ST3");
 
             List<Triangle> triangulation = new ArrayList<>();
             triangulation.add(superTriangle);

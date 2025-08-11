@@ -1,7 +1,5 @@
 package com.data;
 
-import java.util.List;
-
 public class Triangle extends Polygon {
 
     public Triangle(Point p1, Point p2, Point p3) {
@@ -12,10 +10,9 @@ public class Triangle extends Polygon {
     public Triangle(Edge edge, Point point) {
         super();
         // make triangle with edge and points   
-        List<Point> pp = edge.getPointList();
 
-        Point p2 = pp.get(0);
-        Point p3 = pp.get(1);
+        Point p2 = edge.getP1();
+        Point p3 = edge.getP2();
 
         if (point == p2 || point == p3) {
             throw new IllegalArgumentException("Edge has to not include the point");
@@ -26,9 +23,9 @@ public class Triangle extends Polygon {
 
     private void initializeTriangle(Point p1, Point p2, Point p3) {
         // add points
-        this.getPoints().add(p1);
-        this.getPoints().add(p2);
-        this.getPoints().add(p3);
+        this.addPoint(p1);
+        this.addPoint(p2);
+        this.addPoint(p3);
 
         // connect points to each other
         Edge e1 = p1.connectTo(p2);
@@ -36,13 +33,17 @@ public class Triangle extends Polygon {
         Edge e3 = p3.connectTo(p1);
 
         // add edges
-        this.getEdges().add(e1);
-        this.getEdges().add(e2);
-        this.getEdges().add(e3);
+        this.addEdge(e1);
+        this.addEdge(e2);
+        this.addEdge(e3);
 
         // add this triangle to the edges
         for (Edge edge : this.getEdges()) {
-            edge.getPolygons().add(this);
+            edge.addPolygon(this);
         }
     }
+
+    public Point getP1() {return this.getPoints().get(0);}
+    public Point getP2() {return this.getPoints().get(1);}
+    public Point getP3() {return this.getPoints().get(2);}
 }

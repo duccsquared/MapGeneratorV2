@@ -51,7 +51,7 @@ public class VoronoiGraph {
                 for(Edge delaunayEdge: point.getEdges()) {
                     if(delaunayEdge.getPolygons().size()==2) {
                         // connect cirumcircles together and add the points and the edge
-                        List<Polygon> triangles = delaunayEdge.getPolygonList();
+                        List<Polygon> triangles = delaunayEdge.getPolygons();
                         Point p1 = triangles.get(0).getCenter();
                         Point p2 = triangles.get(1).getCenter();
                         Edge edge = p1.connectTo(p2);
@@ -64,7 +64,7 @@ public class VoronoiGraph {
                         throw new IllegalArgumentException("edge with incorrect number of triangles found");
                     }
                 }
-                VoronoiCell voronoiCell = new VoronoiCell(cellPointSet, cellEdgeSet);
+                VoronoiCell voronoiCell = new VoronoiCell(new ArrayList<>(cellPointSet), new ArrayList<>(cellEdgeSet));
                 cells.add(voronoiCell);
 
 

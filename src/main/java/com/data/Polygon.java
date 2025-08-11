@@ -1,30 +1,39 @@
 package com.data;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import lombok.*;
 
-@Getter
-@Setter
+
 public class Polygon {
+    @Getter
+    @Setter
     private Point center;
-    private Set<Point> points;
-    private Set<Edge> edges;
+    private OrderedUniqueList<Point> points;
+    private OrderedUniqueList<Edge> edges;
 
     public Polygon() {
-        this.points = new HashSet<>();
-        this.edges = new HashSet<>();
+        this.points = new OrderedUniqueList<>();
+        this.edges = new OrderedUniqueList<>();
     }
 
-    public List<Point> getPointList() {
-        // convert to list, then return
-        List<Point> pointList = new ArrayList<>();
-        pointList.addAll(this.getPoints());
-        return pointList;   
+    public Polygon(List<Point> points, List<Edge> edges) {
+        this();
+        for (Point point : points) {
+            this.points.add(point);
+        }
+        for (Edge edge : edges) {
+            this.edges.add(edge);
+        }
     }
+
+    public List<Point> getPoints() {return points.getImmutableList();}
+    public List<Edge> getEdges() {return edges.getImmutableList();}
+    public boolean addPoint(Point point) {return this.points.add(point);}
+    // public boolean removePoint(Point point) {return this.points.remove(point);}
+    public boolean addEdge(Edge edge) {return this.edges.add(edge);}
+    // public boolean removeEdge(Edge edge) {return this.edges.remove(edge);}
 
     public void delete(boolean removeEdges, boolean removePoints) {
         // loop through points
@@ -35,7 +44,7 @@ public class Polygon {
 
         // loop through edges to remove
         for (Edge edge : this.edges) {
-            edge.getPolygons().remove(this);
+            edge.removePolygon(this);
             // remove edges if the edges aren't connected to other polygons
             if (removeEdges && edge.getPolygons().isEmpty()) {
                 edge.delete(removePoints);

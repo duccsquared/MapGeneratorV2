@@ -12,7 +12,10 @@ public class Point {
     private double x;
     private double y;
     private String name;
-    private List<Edge> edges = new ArrayList<>();
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private OrderedUniqueList<Edge> edges = new OrderedUniqueList<>();
 
     public Point(double x, double y) {
         this.x = x;
@@ -24,6 +27,19 @@ public class Point {
         this.x = x;
         this.y = y;
     }
+
+    public List<Edge> getEdges() {
+        return this.edges.getImmutableList();
+    }
+
+    public boolean addEdge(Edge edge) {
+        return this.edges.add(edge);
+    }
+
+    public boolean removeEdge(Edge edge) {
+        return this.edges.remove(edge);
+    }
+
 
     public boolean isConnectedTo(Point other) {
         // loop through edges to find other
