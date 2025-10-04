@@ -23,6 +23,12 @@
             <version>1.18.38</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.quickhull3d</groupId>
+            <artifactId>quickhull3d</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -40,7 +46,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.Main</mainClass>
+                    <mainClass>com.Main2</mainClass>
                 </configuration>
             </plugin>
 		<plugin>

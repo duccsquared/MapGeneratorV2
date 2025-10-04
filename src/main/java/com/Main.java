@@ -20,29 +20,32 @@ public class Main extends Application {
     public void start(Stage stage) {
         Pane pane = new Pane();
 
+        // calculate delaunay and voronoi graphs
         DelaunayGraph delaunayGraph = new DelaunayGraph(100, 600, 400);
         VoronoiGraph voronoiGraph = new VoronoiGraph(delaunayGraph);
 
 
+        // delaunay graph
         for(Edge edge: delaunayGraph.getEdges()) {
             Line line = new Line(edge.getP1().getX(),edge.getP1().getY(),edge.getP2().getX(),edge.getP2().getY());
             line.setStroke(Color.LIGHTGRAY);
             pane.getChildren().add(line);
         }
         for(Point point: delaunayGraph.getPoints()) {
-            pane.getChildren().add(createDraggableVertex(point.getX(), point.getY(), pane, Color.GRAY));
+            pane.getChildren().add(new Circle(point.getX(), point.getY(), 6, Color.GRAY));
         }
 
-
+        // voronoi graph
         for(Edge edge: voronoiGraph.getEdges()) {
             Line line = new Line(edge.getP1().getX(),edge.getP1().getY(),edge.getP2().getX(),edge.getP2().getY());
             line.setStroke(Color.BLACK);
             pane.getChildren().add(line);
         }
         for(Point point: voronoiGraph.getPoints()) {
-            pane.getChildren().add(createDraggableVertex(point.getX(), point.getY(), pane, Color.CRIMSON));
+            pane.getChildren().add(new Circle(point.getX(), point.getY(), 6, Color.CRIMSON));
         }
 
+        // scene
         Scene scene = new Scene(pane, 600, 400);
         stage.setScene(scene);
         stage.setTitle("JavaFX App");
