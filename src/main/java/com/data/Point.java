@@ -72,12 +72,28 @@ public class Point {
         return null;
     }
 
+    // @Override
+    // public boolean equals(Object obj) {
+    //     if (!(obj instanceof Point)) return false;
+    //     Point other = (Point) obj;
+    //     return this.x == other.x && this.y == other.y;
+    // }
+
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Point)) return false;
-        Point other = (Point) obj;
-        return this.x == other.x && this.y == other.y;
+    public boolean equals (Object other) {
+        if(other instanceof Point) {
+            Point pOther = (Point) other;
+            return this == other || nearlyEqual(this.x, pOther.x, 1e-6) && nearlyEqual(this.y, pOther.y, 1e-6);
+        }
+        else {
+            return false;
+        }
     }
+
+    private boolean nearlyEqual(double a, double b, double margin) {
+        return a >= b - margin && a <= b + margin;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(x, y);

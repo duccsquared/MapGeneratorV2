@@ -9,25 +9,6 @@ public class SphericalVoronoi {
 
     // --- Basic Point Structures ---
 
-    static class Triangle3D {
-        Point3D a, b, c;
-        Triangle3D(Point3D a, Point3D b, Point3D c) {
-            this.a = a; this.b = b; this.c = c;
-        }
-
-        public boolean includes(Point3D p) {
-            return this.a.equals(p) ||  this.b.equals(p) ||  this.c.equals(p);
-        }
-
-        public List<Point3D> getOthers(Point3D p) {
-            List<Point3D> points = new ArrayList<>();
-            if(!this.a.equals(p)) {points.add(this.a);}
-            if(!this.b.equals(p)) {points.add(this.b);}
-            if(!this.c.equals(p)) {points.add(this.c);}
-            return points;
-        }
-    }
-
     static class EdgeKey {
         int u, v;
         EdgeKey(int a, int b) {
@@ -129,13 +110,13 @@ public class SphericalVoronoi {
     private List<Triangle3D> triangles = new ArrayList<>();
     private List<Point3D> delaunayVertexes = new ArrayList<>();
     private Map<Triangle3D, Point3D> vertexes = new HashMap<>();
-    private List<VoronoiEdge3D> edges = new ArrayList<>();
+    private List<Edge3D> edges = new ArrayList<>();
     private List<VoronoiCell3D> cells = new ArrayList<>();
 
     public List<Triangle3D> getTriangles() {return triangles;}
     public List<Point3D> getDelaunayVertexes() {return delaunayVertexes;}
     public Map<Triangle3D, Point3D> getVertexes() {return vertexes;}
-    public List<VoronoiEdge3D> getEdges() {return edges;}
+    public List<Edge3D> getEdges() {return edges;}
     public List<VoronoiCell3D> getCells() {return cells;}
 
     public SphericalVoronoi() {
@@ -191,13 +172,13 @@ public class SphericalVoronoi {
 
         System.out.println("Delaunay Triangles:");
         for (Triangle3D tri : delaunayTriangles) {
-            System.out.println(tri.a + " " + tri.b + " " + tri.c);
+            System.out.println(tri.getP1() + " " + tri.getP2() + " " + tri.getP3());
         }
 
         // 5. Compute Voronoi vertices (circumcenters)
         Map<Triangle3D, Point3D> circumcenters = new HashMap<>();
         for (Triangle3D tri : delaunayTriangles) {
-            Point3D center = sphericalCircumcenter(tri.a, tri.b, tri.c);
+            Point3D center = sphericalCircumcenter(tri.getP1(), tri.getP2(), tri.getP3());
             circumcenters.put(tri, center);
         }
 
@@ -230,7 +211,7 @@ public class SphericalVoronoi {
         }
 
         // 8. build voronoi edges
-        List<VoronoiEdge3D> voronoiEdges = new ArrayList<>();
+        List<Edge3D> voronoiEdges = new ArrayList<>();
 
         for (Map.Entry<EdgeKey, List<Integer>> entry : edgeToFaces.entrySet()) {
             List<Integer> faces = entry.getValue();
@@ -238,7 +219,7 @@ public class SphericalVoronoi {
                 Point3D c1 = faceCircumcenters.get(faces.get(0));
                 Point3D c2 = faceCircumcenters.get(faces.get(1));
                 if (c1.equals(c2)) continue;
-                VoronoiEdge3D edge = new VoronoiEdge3D(c1, c2);
+                Edge3D edge = new Edge3D(c1, c2);
                 if(voronoiEdges.contains(edge)) continue;
                 voronoiEdges.add(edge);
             }
@@ -268,7 +249,7 @@ public class SphericalVoronoi {
         }
 
         System.out.println("\nVoronoi Edges:");
-        for (VoronoiEdge3D e : voronoiEdges) {
+        for (Edge3D e : voronoiEdges) {
             System.out.println(e);
         }
         System.out.println("Count: " + voronoiEdges.size());

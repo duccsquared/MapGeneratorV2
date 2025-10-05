@@ -9,10 +9,23 @@ import lombok.*;
 
 @Data
 public class DelaunayGraph {
+    private boolean usePeriodicDuplicates;
     private double width;
     private double height;
     private List<Point> points;
     private List<Triangle> triangles;
+
+    public DelaunayGraph(List<Point> points, double width, double height, boolean usePeriodicDuplicates) {
+        // initialize variables
+        this.triangles = new ArrayList<>();
+        this.points = points;
+        this.width = width;
+        this.height = height;
+        this.usePeriodicDuplicates = usePeriodicDuplicates;
+
+        // generate delaunay triangulation
+        this.generateDelaunay();
+    }
 
     public DelaunayGraph(List<Point> points, double width, double height) {
         // initialize variables
@@ -20,6 +33,7 @@ public class DelaunayGraph {
         this.points = points;
         this.width = width;
         this.height = height;
+        this.usePeriodicDuplicates = true;
 
         // generate delaunay triangulation
         this.generateDelaunay();
@@ -47,6 +61,7 @@ public class DelaunayGraph {
         // set more variables
         this.width = width;
         this.height = height;
+        this.usePeriodicDuplicates = true;
 
         // generate delaunay triangulation
         this.generateDelaunay();
@@ -76,21 +91,29 @@ public class DelaunayGraph {
             triangulation.add(superTriangle);
 
             // --- step 2: create periodic duplicates ---
-            // loop through points
             List<Point> periodicPoints = new ArrayList<>();
-            for (Point point : points) {
-                // loop through all adjacent locations
-                for (double dx : new double[] { -this.width, 0, this.width }) {
-                    for (double dy : new double[] { -this.height, 0, this.height }) {
-                        // use a ghost point instead of a regular point if it's not an original point
-                        if (dx == 0 && dy == 0) {
-                            periodicPoints.add(point);
-                        } else {
-                            periodicPoints.add(new GhostPoint(point, point.getX() + dx, point.getY() + dy));
+            // loop through points
+            if(usePeriodicDuplicates) {
+                for (Point point : points) {
+                    // loop through all adjacent locations
+                    for (double dx : new double[] { -this.width, 0, this.width }) {
+                        for (double dy : new double[] { -this.height, 0, this.height }) {
+                            // use a ghost point instead of a regular point if it's not an original point
+                            if (dx == 0 && dy == 0) {
+                                periodicPoints.add(point);
+                            } else {
+                                periodicPoints.add(new GhostPoint(point, point.getX() + dx, point.getY() + dy));
+                            }
                         }
                     }
                 }
             }
+            // duplicate points list
+            else {
+                periodicPoints.addAll(points);
+            }
+            
+
 
             // --- step 3: insert points into the graph ---
             List<Triangle> fullBadTriangles = new ArrayList<>();
@@ -176,18 +199,25 @@ public class DelaunayGraph {
 
             // --- step 5: filter triangles outside the original domain---
 
-            // only include triangles that include at least one regular point
-            for (Triangle triangle : clearedTriangulation) {
-                int ghostCount = 0;
-                for (Point point : triangle.getPoints()) {
-                    if (point instanceof GhostPoint) {
-                        ghostCount += 1;
+            if(usePeriodicDuplicates) {
+                // only include triangles that include at least one regular point
+                for (Triangle triangle : clearedTriangulation) {
+                    int ghostCount = 0;
+                    for (Point point : triangle.getPoints()) {
+                        if (point instanceof GhostPoint) {
+                            ghostCount += 1;
+                        }
+                    }
+                    if (ghostCount < 3) {
+                        this.triangles.add(triangle);
                     }
                 }
-                if (ghostCount < 3) {
-                    this.triangles.add(triangle);
-                }
             }
+            else {
+                // duplicate triangles
+                this.triangles.addAll(clearedTriangulation);
+            }
+
 
 
         } catch (Exception e) {
