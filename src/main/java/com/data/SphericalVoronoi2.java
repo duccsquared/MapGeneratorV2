@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class SphericalVoronoi2 {
@@ -23,10 +22,12 @@ public class SphericalVoronoi2 {
     // --- project from 3D to 2D ---
 
     static Point projectTo2D(Point3D point3d) {
-        double denom = 1 - point3d.z;
-        double px = point3d.x / denom;
-        double py = point3d.y / denom;
-        return new Point(px, py);
+        double denom = 1.0 - point3d.z;
+        if (Math.abs(denom) < 1e-12) {
+            // point too close to north pole: either rotate dataset first, or perturb slightly
+            throw new IllegalArgumentException("Point too close to projection pole: " + point3d);
+        }
+        return new Point(point3d.x / denom, point3d.y / denom);
     }
 
     // --- inverse project from 2D to 3D ---
@@ -68,64 +69,47 @@ public class SphericalVoronoi2 {
     }
 
     // Projects circumcenter into tangent plane and computes atan2 angle
-    private static double angleAtSite(Point3D site, Point3D u, Point3D v, Point3D c) {
-        // Vector from site to circumcenter
-        Point3D vec = normalize(c);
-        // project into tangent plane
-        double x = dot(vec, u);
-        double y = dot(vec, v);
+    private static double atan2AroundSite(Point3D site, Point3D e1, Point3D e2, Point3D c) {
+        // Project c onto tangent plane at site:
+        Point3D cNorm = normalize(c);
+        // Remove radial component along site
+        double radial = dot(cNorm, site);
+        Point3D proj = new Point3D(cNorm.x - radial*site.x,
+                                cNorm.y - radial*site.y,
+                                cNorm.z - radial*site.z);
+        double projLen = length(proj);
+        if (projLen < 1e-12) {
+            // Degenerate: circumcenter lies (almost) on the site direction.
+            // Return some angle based on e.g. dot with e1.
+            return 0.0;
+        }
+        Point3D p = new Point3D(proj.x / projLen, proj.y / projLen, proj.z / projLen);
+        double x = dot(p, e1);
+        double y = dot(p, e2);
         return Math.atan2(y, x);
     }
 
+
     public static List<Point3D> sortAroundSite(Point3D site, Collection<Point3D> circumcenters) {
-        // Step 1: define an orthonormal basis in the tangent plane at `site`
-        Point3D north = new Point3D(0, 0, 1);
-        Point3D u = cross(north, site); // first tangent axis
-        final Point3D newU;
-        if (length(u) < 1e-6) {
-            // site is too close to north pole -> pick another reference
-            north = new Point3D(0, 1, 0);
-            newU = normalize(cross(north, site));
-        } else {
-            newU = normalize(u);
+        // Basis for tangent plane
+        Point3D north = new Point3D(0,0,1);
+        Point3D u = cross(north, site);
+        if (length(u) < 1e-8) { // site near north pole
+            north = new Point3D(0,1,0);
+            u = cross(north, site);
         }
+        Point3D e1 = normalize(u);
+        Point3D e2 = normalize(cross(site, e1)); // guaranteed orthogonal
 
-        Point3D v = normalize(cross(site, u)); // second tangent axis
-
-        // Step 2: compute angle of each circumcenter around site
         List<Point3D> sorted = new ArrayList<>(circumcenters);
         sorted.sort((p1, p2) -> {
-            double a1 = angleAtSite(site, newU, v, p1);
-            double a2 = angleAtSite(site, newU, v, p2);
+            double a1 = atan2AroundSite(site, e1, e2, p1);
+            double a2 = atan2AroundSite(site, e1, e2, p2);
             return Double.compare(a1, a2);
         });
-
         return sorted;
     }
 
-    // --- EdgeKey ---
-
-    static class EdgeKey {
-        int u, v;
-
-        EdgeKey(int a, int b) {
-            this.u = Math.min(a, b);
-            this.v = Math.max(a, b);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof EdgeKey))
-                return false;
-            EdgeKey e = (EdgeKey) o;
-            return this.u == e.u && this.v == e.v;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(u, v);
-        }
-    }
 
     static Point3D getPoint(double u, double v) {
         double theta = 2 * Math.PI * u; // longitude
@@ -230,36 +214,36 @@ public class SphericalVoronoi2 {
         // --- 4. map triangulation edges back onto the sphere ---
 
         List<Triangle3D> delaunayTriangles = new ArrayList<>();
-        HashMap<Point, Point3D> projectedPoints = new HashMap<>();
-        Set<Point3D> pointSet = new HashSet<>();
+        HashMap<Integer, Point3D> projectedPoints = new HashMap<>();
+        List<Point3D> pointList = new ArrayList<>();
 
         for (Triangle tri : delaunayGraph.getTriangles()) {
             Point3D a;
             Point3D b;
             Point3D c;
             // point 1
-            if (projectedPoints.containsKey(tri.getP1())) {
-                a = projectedPoints.get(tri.getP1());
+            if (projectedPoints.containsKey(tri.getP1().getId())) {
+                a = projectedPoints.get(tri.getP1().getId());
             } else {
                 a = projectTo3D(tri.getP1());
-                projectedPoints.put(tri.getP1(), a);
-                pointSet.add(a);
+                projectedPoints.put(tri.getP1().getId(), a);
+                pointList.add(a);
             }
             // point 2
-            if (projectedPoints.containsKey(tri.getP2())) {
-                b = projectedPoints.get(tri.getP2());
+            if (projectedPoints.containsKey(tri.getP2().getId())) {
+                b = projectedPoints.get(tri.getP2().getId());
             } else {
                 b = projectTo3D(tri.getP2());
-                projectedPoints.put(tri.getP2(), b);
-                pointSet.add(b);
+                projectedPoints.put(tri.getP2().getId(), b);
+                pointList.add(b);
             }
             // point 3
-            if (projectedPoints.containsKey(tri.getP3())) {
-                c = projectedPoints.get(tri.getP3());
+            if (projectedPoints.containsKey(tri.getP3().getId())) {
+                c = projectedPoints.get(tri.getP3().getId());
             } else {
                 c = projectTo3D(tri.getP3());
-                projectedPoints.put(tri.getP3(), c);
-                pointSet.add(c);
+                projectedPoints.put(tri.getP3().getId(), c);
+                pointList.add(c);
             }
             delaunayTriangles.add(new Triangle3D(a, b, c));
         }
@@ -267,36 +251,35 @@ public class SphericalVoronoi2 {
         // --- 5. connect north pole ---
 
         // get planar hull edges
-        Set<Edge> planarHullEdges = new HashSet<>();
-        for (Triangle triangle : delaunayGraph.getTriangles()) {
-            for (Edge edge : triangle.getEdges()) {
-                // hull edges are those with only one adjacent triangle
-                if (edge.getPolygons().size() == 1) {
-                    planarHullEdges.add(edge);
-                }
+        Map<EdgeKey,Edge> planarHullEdgesMap = new HashMap<>();
+        for (Edge edge : delaunayGraph.getEdges()) {
+            // hull edges are those with only one adjacent triangle
+            if (edge.getPolygons().size() == 1) {
+                planarHullEdgesMap.put(edge.getEdgeKey(), edge);
             }
         }
-
+        List<Edge> planarHullEdges = new ArrayList<>(planarHullEdgesMap.values());
         // create triangles
         Point3D northPole = new Point3D(0, 0, 1);
+        delaunayVertexes.add(northPole);
         for (Edge edge : planarHullEdges) {
             Point3D a;
             Point3D b;
             // point 1
-            if (projectedPoints.containsKey(edge.getP1())) {
-                a = projectedPoints.get(edge.getP1());
+            if (projectedPoints.containsKey(edge.getP1().getId())) {
+                a = projectedPoints.get(edge.getP1().getId());
             } else {
                 a = projectTo3D(edge.getP1());
-                projectedPoints.put(edge.getP1(), a);
-                pointSet.add(a);
+                projectedPoints.put(edge.getP1().getId(), a);
+                pointList.add(a);
             }
             // point 2
-            if (projectedPoints.containsKey(edge.getP2())) {
-                b = projectedPoints.get(edge.getP2());
+            if (projectedPoints.containsKey(edge.getP2().getId())) {
+                b = projectedPoints.get(edge.getP2().getId());
             } else {
                 b = projectTo3D(edge.getP2());
-                projectedPoints.put(edge.getP2(), b);
-                pointSet.add(b);
+                projectedPoints.put(edge.getP2().getId(), b);
+                pointList.add(b);
             }
             delaunayTriangles.add(new Triangle3D(northPole, a, b));
         }
@@ -312,10 +295,11 @@ public class SphericalVoronoi2 {
         }
 
         // --- 7. create Voronoi edges ---
-        for (Point3D point : pointSet) {
+        List<VoronoiCell3D> cells = new ArrayList<>();
+        for (Point3D point : pointList) {
             // cell variables
-            Set<Point3D> cellPointSet = new HashSet<>();
-            Set<Edge3D> cellEdgeSet = new HashSet<>();
+            Set<Point3D> cellpointList = new HashSet<>();
+            Map<EdgeKey,Edge3D> cellEdgeMap = new HashMap<>();
             // loop through edges connected to the point
             for (Edge3D delaunayEdge : point.getEdges()) {
                 if (delaunayEdge.getPolygons().size() == 2) {
@@ -324,25 +308,57 @@ public class SphericalVoronoi2 {
                     Point3D p1 = triangles.get(0).getCenter();
                     Point3D p2 = triangles.get(1).getCenter();
                     Edge3D edge = p1.connectTo(p2);
-                    cellPointSet.add(p1);
-                    cellPointSet.add(p2);
-                    cellEdgeSet.add(edge);
+                    cellpointList.add(p1);
+                    cellpointList.add(p2);
+                    cellEdgeMap.put(edge.getEdgeKey(), edge);
+                    
                 } else {
                     // edges are supposed to only have two triangles on each side
-                    throw new IllegalArgumentException("edge with incorrect number of triangles found");
+                    throw new IllegalStateException("edge with incorrect number of triangles found");
                 }
             }
-            VoronoiCell3D voronoiCell = new VoronoiCell3D(new ArrayList<>(sortAroundSite(point, cellPointSet)),
-                    new ArrayList<>(cellEdgeSet));
-            this.cells.add(voronoiCell);
+
+            VoronoiCell3D voronoiCell = new VoronoiCell3D(new ArrayList<>(sortAroundSite(point, cellpointList)),
+                    new ArrayList<>(cellEdgeMap.values()));
+            cells.add(voronoiCell);
 
         }
 
-        // --- 8. save variables ---
+        // --- 8. sanity check --- (Currently doesn't worth, there might be an issue with the code)
+
+        // // check euler characteristic for the voronoi graph (V - E + F = 2)
+        // int V = voronoiPoints.size();
+        // int E = 0;
+        // for (VoronoiCell3D cell : cells) {
+        //     E += cell.getEdges().size();
+        // }
+        // int F = cells.size();
+        // E = E / 2; // each edge is counted twice
+        // int euler = V - E + F;
+        // if (euler != 2) {
+        //     throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
+        //     V + " - " + E + " + " + F + " = " + euler + " != 2");
+        // }
+
+        // calculate euler characteristic for the delaunay graph
+        // int V = pointList.size();
+        // int E = 0;
+        // for (Point3D p : pointList) {
+        //     E += p.getEdges().size();
+        // }
+        // int F = delaunayTriangles.size();
+        // E = E / 2; // each edge is counted twice
+        // int euler = V - E + F;
+        // if (euler != 2) {
+        //     throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
+        //     V + " - " + E + " + " + F + " = " + euler + " != 2");
+        // }
+
+        // --- 9. save variables ---
 
         this.triangles = delaunayTriangles;
         this.delaunayVertexes = new ArrayList<>();
-        this.delaunayVertexes.addAll(pointSet);
+        this.delaunayVertexes.addAll(pointList);
         this.vertexes = new HashMap<>();
         for (Triangle3D tri : delaunayTriangles) {
             this.vertexes.put(tri, tri.getCenter());

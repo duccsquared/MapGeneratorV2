@@ -9,6 +9,8 @@ import lombok.*;
 @Setter
 @Getter
 public class Point3D {
+    private static int seq = 0;
+    private int id;
     public double x, y, z;
     private String name;
 
@@ -17,10 +19,13 @@ public class Point3D {
     private OrderedUniqueList<Edge3D> edges = new OrderedUniqueList<>();
 
     public Point3D(double x, double y, double z) {
+        this.id = seq; seq += 1;
         this.x = x; this.y = y; this.z = z;
+        
     }
 
     public Point3D(double x, double y, double z, String name) {
+        this.id = seq; seq += 1;
         this.x = x; this.y = y; this.z = z; this.name = name;
     }
 
@@ -29,16 +34,17 @@ public class Point3D {
     public boolean equals (Object other) {
         if(other instanceof Point3D) {
             Point3D pOther = (Point3D) other;
-            return this == other || nearlyEqual(this.x, pOther.x, 1e-6) && nearlyEqual(this.y, pOther.y, 1e-6) && nearlyEqual(this.z, pOther.z, 1e-6);
+            return this.getId() == pOther.getId();
+            // return this == other || nearlyEqual(this.x, pOther.x, 1e-6) && nearlyEqual(this.y, pOther.y, 1e-6) && nearlyEqual(this.z, pOther.z, 1e-6);
         }
         else {
             return false;
         }
     }
 
-    private boolean nearlyEqual(double a, double b, double margin) {
-        return a >= b - margin && a <= b + margin;
-    }
+    // private boolean nearlyEqual(double a, double b, double margin) {
+    //     return a >= b - margin && a <= b + margin;
+    // }
 
     public List<Edge3D> getEdges() {
         return this.edges.getImmutableList();

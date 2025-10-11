@@ -71,5 +71,25 @@ public class Edge {
         return "[" + String.join(", ", pointStrings) + "]";
     }
 
+    @Override 
+    public boolean equals(Object other) {
+        if(other instanceof Edge) {
+            Edge vOther = (Edge) other;
+            return this.getEdgeKey().equals(vOther.getEdgeKey());
+            // return (this.getP1().equals(vOther.getP1()) && this.getP2().equals(vOther.getP2())) || (this.getP1().equals(vOther.getP2()) && this.getP2().equals(vOther.getP1()));
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getEdgeKey().hashCode();
+    }
+
+    public EdgeKey getEdgeKey() {
+        return new EdgeKey(this.getP1().getId(), this.getP2().getId());
+    }
 
 }

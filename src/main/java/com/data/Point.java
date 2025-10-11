@@ -9,6 +9,8 @@ import lombok.*;
 @Setter
 @Getter
 public class Point {
+    private static int seq = 0;
+    private int id;
     private double x;
     private double y;
     private String name;
@@ -18,11 +20,15 @@ public class Point {
     private OrderedUniqueList<Edge> edges = new OrderedUniqueList<>();
 
     public Point(double x, double y) {
+        this.id = seq; seq += 1;
+        this.id = (int)(Math.random()*Integer.MAX_VALUE);
         this.x = x;
         this.y = y;
     }
 
     public Point(double x, double y, String name) {
+        this.id = seq; seq += 1;
+        this.id = (int)(Math.random()*Integer.MAX_VALUE);
         this.name = name;
         this.x = x;
         this.y = y;
@@ -83,16 +89,17 @@ public class Point {
     public boolean equals (Object other) {
         if(other instanceof Point) {
             Point pOther = (Point) other;
-            return this == other || nearlyEqual(this.x, pOther.x, 1e-6) && nearlyEqual(this.y, pOther.y, 1e-6);
+            return this.getId() == pOther.getId();
+            // return this == other || nearlyEqual(this.x, pOther.x, 1e-6) && nearlyEqual(this.y, pOther.y, 1e-6);
         }
         else {
             return false;
         }
     }
 
-    private boolean nearlyEqual(double a, double b, double margin) {
-        return a >= b - margin && a <= b + margin;
-    }
+    // private boolean nearlyEqual(double a, double b, double margin) {
+    //     return a >= b - margin && a <= b + margin;
+    // }
 
     @Override
     public int hashCode() {

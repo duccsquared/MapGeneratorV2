@@ -1,7 +1,9 @@
 package com.data;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class Edge3D {
 
@@ -76,10 +78,21 @@ public class Edge3D {
     public boolean equals(Object other) {
         if(other instanceof Edge3D) {
             Edge3D vOther = (Edge3D) other;
-            return (this.getP1().equals(vOther.getP1()) && this.getP2().equals(vOther.getP2())) || (this.getP1().equals(vOther.getP2()) && this.getP2().equals(vOther.getP1()));
+            return this.getEdgeKey().equals(vOther.getEdgeKey());
+            // return (this.getP1().equals(vOther.getP1()) && this.getP2().equals(vOther.getP2())) || (this.getP1().equals(vOther.getP2()) && this.getP2().equals(vOther.getP1()));
         }
         else {
             return false;
         }
     }
+
+    @Override
+    public int hashCode() {
+        return this.getEdgeKey().hashCode();
+    }
+
+    public EdgeKey getEdgeKey() {
+        return new EdgeKey(this.getP1().getId(), this.getP2().getId());
+    }
+
 }

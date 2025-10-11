@@ -22,6 +22,11 @@ public class Circumsphere {
         Point3D n = cross(AB, AC);
         double n2 = dot(n, n);
 
+        if (n2 < 1e-16) {
+            // degenerate - handle specially
+            throw new IllegalArgumentException("Triangle points are collinear; circumcenter is undefined.");
+        }
+
         double ab2 = dot(AB, AB);
         double ac2 = dot(AC, AC);
 
