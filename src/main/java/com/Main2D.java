@@ -15,7 +15,7 @@ import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 
-public class Main extends Application {
+public class Main2D extends Application {
     @Override
     public void start(Stage stage) {
         Pane pane = new Pane();
@@ -56,6 +56,7 @@ public class Main extends Application {
         launch(args);
     }
 
+    @SuppressWarnings("unused")
     private Circle createDraggableVertex(double x, double y, Pane pane, Color color) {
         Circle vertex = new Circle(x, y, 6, color);
 

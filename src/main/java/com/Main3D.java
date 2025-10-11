@@ -2,7 +2,7 @@ package com;
 
 import com.data.SphericalVoronoi;
 import com.data.VoronoiCell3D;
-import com.data.Edge3D;
+// import com.data.Edge3D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,14 +15,14 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
+// import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 // import javafx.scene.Scene;
 import javafx.stage.Stage;
 // import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 
-public class Main2 extends Application {
+public class Main3D extends Application {
 
     static double yaw = 0;
     static double pitch = 0;
@@ -38,11 +38,6 @@ public class Main2 extends Application {
             cellViews.add(new CellView(cell, pane));
         }
 
-        List<EdgeView> edgeViews = new ArrayList<>();
-        for(Edge3D edge: sphericalVoronoi.getEdges()) {
-            edgeViews.add(new EdgeView(edge,pane));
-        }
-
         Map<Point3D,PointView> pointViewMap = new HashMap<>();
         List<PointView> pointViews = new ArrayList<>();
         for(Point3D point: sphericalVoronoi.getVertexes().values()) {
@@ -52,8 +47,9 @@ public class Main2 extends Application {
         }
 
         // for(Point3D point: sphericalVoronoi.getDelaunayVertexes()) {
-        //     PointView pointView = new PointView(point,pane,Color.RED);
+        //     PointView pointView = new PointView(point,pane);
         //     pointViews.add(pointView);
+        //     pointViewMap.put(point, pointView);
         // }
 
         // scene
@@ -85,18 +81,15 @@ public class Main2 extends Application {
             }
 
             if(sphereMoved) {
-                updateAll(pointViews,edgeViews,cellViews);
+                updateAll(pointViews,cellViews);
             }
         });
         stage.show();
     }
 
-    public static void updateAll(List<PointView> pointViews, List<EdgeView> edgeViews, List<CellView> cellViews) {
+    public static void updateAll(List<PointView> pointViews, List<CellView> cellViews) {
         for(PointView pointView: pointViews) {
             pointView.update();
-        }
-        for(EdgeView edgeView: edgeViews) {
-            edgeView.update();
         }
         for(CellView cellView: cellViews) {
             cellView.update();
@@ -184,37 +177,6 @@ public class Main2 extends Application {
             this.pointDisplay.setCenterY(p[1]);
         }
     }   
-    class EdgeView {
-        Edge3D edge;
-        Line edgeDisplay;
-        public EdgeView(Edge3D edge, Pane pane) {
-            this.edge = edge;
-            double[] p1 = this.getP1Projected();
-            double[] p2 = this.getP2Projected();
-            this.edgeDisplay = new Line(p1[0],p1[1],p2[0],p2[1]);
-            this.edgeDisplay.setStroke(Color.LIGHTGRAY);
-            pane.getChildren().add(this.edgeDisplay);
-        }
-
-        public Edge3D getEdge() {
-            return edge;
-        }
-        public double[] getP1Projected() {
-            return projectTo2D_Perspective(edge.getP1(), 600, 400);
-        }
-        public double[] getP2Projected() {
-            return projectTo2D_Perspective(edge.getP2(), 600, 400);
-        }
-        public void update() {
-            double[] p1 = this.getP1Projected();
-            double[] p2 = this.getP2Projected();
-            // update edge based on points (x,y)
-            this.edgeDisplay.setStartX(p1[0]);
-            this.edgeDisplay.setStartY(p1[1]);
-            this.edgeDisplay.setEndX(p2[0]);
-            this.edgeDisplay.setEndY(p2[1]);
-        }
-    }
 
     class CellView {
         VoronoiCell3D cell;
