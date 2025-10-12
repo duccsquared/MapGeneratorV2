@@ -3,6 +3,7 @@ package com;
 import com.data.SphericalVoronoi;
 import com.data.VoronoiCell3D;
 // import com.data.Edge3D;
+import com.data.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,7 +105,7 @@ public class Main3D extends Application {
     static double[] projectTo2D_Perspective(Point3D p, double width, double height) {
         double cameraZ = 3; // camera distance > 1
         double fov = 400;
-        Point3D rotatedPoint = rotateX(rotateZ(p, yaw), pitch);
+        Point3D rotatedPoint = Util.rotateX(Util.rotateZ(p, yaw), pitch);
 
         // perspective division
         double x2d = width / 2.0 + fov * (rotatedPoint.x / (cameraZ - rotatedPoint.z));
@@ -123,29 +124,6 @@ public class Main3D extends Application {
 
         return new double[]{x, y};
     }
-
-
-    static Point3D rotateZ(Point3D p, double angle) { // yaw
-        double cos = Math.cos(angle), sin = Math.sin(angle);
-        double x = cos * p.x - sin * p.y;
-        double y = sin * p.x + cos * p.y;
-        return new Point3D(x, y, p.z);
-    }
-
-    static Point3D rotateX(Point3D p, double angle) { // pitch
-        double cos = Math.cos(angle), sin = Math.sin(angle);
-        double y = cos * p.y - sin * p.z;
-        double z = sin * p.y + cos * p.z;
-        return new Point3D(p.x, y, z);
-    }
-
-    static Point3D rotateY(Point3D p, double angle) { // roll
-        double cos = Math.cos(angle), sin = Math.sin(angle);
-        double x = cos * p.x + sin * p.z;
-        double z = -sin * p.x + cos * p.z;
-        return new Point3D(x, p.y, z);
-    }
-
 
     class PointView {
         Point3D point;

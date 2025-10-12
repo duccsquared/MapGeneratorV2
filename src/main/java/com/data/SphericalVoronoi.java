@@ -43,49 +43,24 @@ public class SphericalVoronoi {
 
     }
 
-    // --- Vector Utilities ---
-    static Point3D cross(Point3D u, Point3D v) {
-        return new Point3D(
-                u.y * v.z - u.z * v.y,
-                u.z * v.x - u.x * v.z,
-                u.x * v.y - u.y * v.x);
-    }
-
-    private static double length(Point3D p) {
-        return Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
-    }
-
-    static double dot(Point3D u, Point3D v) {
-        return u.x * v.x + u.y * v.y + u.z * v.z;
-    }
-
-    static Point3D normalize(Point3D p) {
-        double len = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
-        return new Point3D(p.x / len, p.y / len, p.z / len);
-    }
-
-    static boolean nearlyEqual(double a, double b, double margin) {
-        return a >= b - margin && a <= b + margin;
-    }
-
     // Projects circumcenter into tangent plane and computes atan2 angle
     private static double atan2AroundSite(Point3D site, Point3D e1, Point3D e2, Point3D c) {
         // Project c onto tangent plane at site:
-        Point3D cNorm = normalize(c);
+        Point3D cNorm = Util.normalize(c);
         // Remove radial component along site
-        double radial = dot(cNorm, site);
+        double radial = Util.dot(cNorm, site);
         Point3D proj = new Point3D(cNorm.x - radial*site.x,
                                 cNorm.y - radial*site.y,
                                 cNorm.z - radial*site.z);
-        double projLen = length(proj);
+        double projLen = Util.length(proj);
         if (projLen < 1e-12) {
             // Degenerate: circumcenter lies (almost) on the site direction.
             // Return some angle based on e.g. dot with e1.
             return 0.0;
         }
         Point3D p = new Point3D(proj.x / projLen, proj.y / projLen, proj.z / projLen);
-        double x = dot(p, e1);
-        double y = dot(p, e2);
+        double x = Util.dot(p, e1);
+        double y = Util.dot(p, e2);
         return Math.atan2(y, x);
     }
 
@@ -93,13 +68,13 @@ public class SphericalVoronoi {
     public static List<Point3D> sortAroundSite(Point3D site, Collection<Point3D> circumcenters) {
         // Basis for tangent plane
         Point3D north = new Point3D(0,0,1);
-        Point3D u = cross(north, site);
-        if (length(u) < 1e-8) { // site near north pole
+        Point3D u = Util.cross(north, site);
+        if (Util.length(u) < 1e-8) { // site near north pole
             north = new Point3D(0,1,0);
-            u = cross(north, site);
+            u = Util.cross(north, site);
         }
-        Point3D e1 = normalize(u);
-        Point3D e2 = normalize(cross(site, e1)); // guaranteed orthogonal
+        Point3D e1 = Util.normalize(u);
+        Point3D e2 = Util.normalize(Util.cross(site, e1)); // guaranteed orthogonal
 
         List<Point3D> sorted = new ArrayList<>(circumcenters);
         sorted.sort((p1, p2) -> {
@@ -108,23 +83,6 @@ public class SphericalVoronoi {
             return Double.compare(a1, a2);
         });
         return sorted;
-    }
-
-
-    static Point3D getPoint(double u, double v) {
-        double theta = 2 * Math.PI * u; // longitude
-        double phi = Math.acos(2 * v - 1); // colatitude
-
-        double x = Math.sin(phi) * Math.cos(theta);
-        double y = Math.sin(phi) * Math.sin(theta);
-        double z = Math.cos(phi);
-        return new Point3D(x, y, z);
-    }
-
-    static Point3D getRandomPoint() {
-        double u = Math.random(); // in [0,1)
-        double v = Math.random(); // in [0,1)
-        return getPoint(u, v);
     }
 
     // --- data ---
@@ -164,13 +122,13 @@ public class SphericalVoronoi {
 
         ArrayList<Point3D> samplePoints = new ArrayList<>();
         // for(int i = 0; i < 100; i++) {
-        // samplePoints.add(getRandomPoint());
+        // samplePoints.add(Util.getRandomLatLongPoint());
         // }
 
         double u = 0;
         double v = 0.98;
         for (int i = 0; i < 98; i++) {
-            samplePoints.add(getPoint(u, v));
+            samplePoints.add(Util.getPointByLatLong(u, v));
             v -= 0.01;
             u += 0.12;
             if (u > 1) {
