@@ -7,10 +7,14 @@ import com.data.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.List;
 
 import com.data.Point3D;
+
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -27,6 +31,10 @@ public class Main3D extends Application {
 
     static double yaw = 0;
     static double pitch = 0;
+    private List<PointView> pointViews;
+    private List<CellView> cellViews;
+    private final Set<KeyCode> pressedKeys = new HashSet<>();
+    
     @Override
     public void start(Stage stage) {
         Pane pane = new Pane();
@@ -34,13 +42,13 @@ public class Main3D extends Application {
         // calculate delaunay and voronoi graphs
         SphericalVoronoi sphericalVoronoi = new SphericalVoronoi();
 
-        List<CellView> cellViews = new ArrayList<>();
+        cellViews = new ArrayList<>();
         for(VoronoiCell3D cell: sphericalVoronoi.getCells()) {
             cellViews.add(new CellView(cell, pane));
         }
 
         Map<Point3D,PointView> pointViewMap = new HashMap<>();
-        List<PointView> pointViews = new ArrayList<>();
+        pointViews = new ArrayList<>();
         for(Point3D point: sphericalVoronoi.getVertexes().values()) {
             PointView pointView = new PointView(point,pane);
             pointViewMap.put(point, pointView);
@@ -58,34 +66,52 @@ public class Main3D extends Application {
         stage.setScene(scene);
         stage.setTitle("JavaFX App");
 
-        scene.setOnKeyPressed(event -> {
-            boolean sphereMoved = false;
-            if (event.getCode() == KeyCode.LEFT) {
-                System.out.println("Left key pressed!");
-                yaw -= 0.2;
-                sphereMoved = true;
-            }
-            if (event.getCode() == KeyCode.RIGHT) {
-                System.out.println("Right key pressed!");
-                yaw += 0.2;
-                sphereMoved = true;
-            }
-            if (event.getCode() == KeyCode.DOWN) {
-                System.out.println("Down key pressed!");
-                pitch -= 0.2;
-                sphereMoved = true;
-            } 
-            if (event.getCode() == KeyCode.UP) {
-                System.out.println("Up key pressed!");
-                pitch += 0.2;
-                sphereMoved = true;
-            }
 
-            if(sphereMoved) {
-                updateAll(pointViews,cellViews);
+        // Track pressed keys
+        scene.setOnKeyPressed(event -> pressedKeys.add(event.getCode()));
+        scene.setOnKeyReleased(event -> pressedKeys.remove(event.getCode()));
+
+        // Run a tracking loop to check key states
+        AnimationTimer loop = new AnimationTimer() {
+            private long lastUpdate = 0;
+
+            @Override
+            public void handle(long now) {
+                if (now - lastUpdate >= 8_000_000) { // 30 FPS
+                    handleKeys();
+                    lastUpdate = now;
+                }
             }
-        });
+        };
+        loop.start();
+
         stage.show();
+    }
+
+    private void handleKeys() {
+        boolean sphereMoved = false;
+
+        if (pressedKeys.contains(KeyCode.LEFT)) {
+            yaw -= 0.025;
+            sphereMoved = true;
+        }
+        if (pressedKeys.contains(KeyCode.RIGHT)) {
+            yaw += 0.025;
+            sphereMoved = true;
+        }
+        if (pressedKeys.contains(KeyCode.UP)) {
+            pitch += 0.025;
+            sphereMoved = true;
+        }
+        if (pressedKeys.contains(KeyCode.DOWN)) {
+            pitch -= 0.025;
+            sphereMoved = true;
+        }
+
+        if (sphereMoved) {
+            System.out.printf("yaw=%.2f, pitch=%.2f%n", yaw, pitch);
+            updateAll(pointViews,cellViews);
+        }
     }
 
     public static void updateAll(List<PointView> pointViews, List<CellView> cellViews) {
