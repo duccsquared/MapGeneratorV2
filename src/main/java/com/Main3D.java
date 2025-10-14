@@ -70,6 +70,9 @@ public class Main3D extends Application {
             cellViews.add(cellView);
         }
 
+        // update to ensure correctness
+        updateAll();
+
         // scene
         Scene scene = new Scene(pane, 600, 400);
         stage.setScene(scene);
@@ -134,6 +137,15 @@ public class Main3D extends Application {
         for(CellView cellView : cellViews) {
             cellView.update();
         }
+        // sort cellviews by z-order
+        cellViews.sort((a,b) -> Double.compare(b.getzOrder(), a.getzOrder()));
+        // move cell views and corresponding point views to front based on order
+        for(CellView cellView : cellViews) {
+            cellView.getCellDisplay().toFront();
+            for(Point3D v : cellView.getCell().getPoints()) {
+                pointViewMap.get(v).getPointDisplay().toFront();
+            }
+        }
     }
 
     void updateCameraCoords() {
@@ -185,6 +197,7 @@ public class Main3D extends Application {
     class PointView {
         Point3D point;
         Circle pointDisplay;
+        double zOrder = 0;
 
         public PointView(Point3D point, Pane pane, Color color) {
             this.point = point;
@@ -206,6 +219,9 @@ public class Main3D extends Application {
         public Circle getPointDisplay() {
             return pointDisplay;
         }
+        public double getzOrder() {
+            return zOrder;
+        }
         public double[] getPointProjected() {
             return calculateProjectedPosition(this.point);
         }
@@ -213,12 +229,15 @@ public class Main3D extends Application {
             double[] p = this.getPointProjected();
             this.pointDisplay.setCenterX(p[0]);
             this.pointDisplay.setCenterY(p[1]);
+            this.zOrder = Util.dot(this.getPoint(), cameraZ) + cameraTranslation.getZ();
         }
     }   
 
     class CellView {
         VoronoiCell3D cell;
         Polygon cellDisplay;
+        double zOrder = 0;
+
         public CellView(VoronoiCell3D cell, Pane pane) {
             this.cell = cell;
             this.cellDisplay = new Polygon();
@@ -228,7 +247,7 @@ public class Main3D extends Application {
                 // coordsList.add(xy);
                 cellDisplay.getPoints().addAll(x,y);
             }
-            this.cellDisplay.setFill(Color.color(Math.random(), Math.random(), Math.random(), 0.4));
+            this.cellDisplay.setFill(Color.color(Math.random(), Math.random(), Math.random(), 1));
             this.cellDisplay.setStroke(Color.BLACK);
             pane.getChildren().add(this.cellDisplay);
             this.cellDisplay.toBack();
@@ -237,14 +256,24 @@ public class Main3D extends Application {
         public VoronoiCell3D getCell() {
             return cell;
         }
+        public Polygon getCellDisplay() {
+            return cellDisplay;
+        }
+        public double getzOrder() {
+            return zOrder;
+        }
         public void update() {
             // remove points from cellDisplay and replace them with updated points
             this.cellDisplay.getPoints().clear();
+            double totalZ = 0;
             for (Point3D v : cell.getPoints()) {
                 double x = pointViewMap.get(v).getPointDisplay().getCenterX();
                 double y = pointViewMap.get(v).getPointDisplay().getCenterY();
                 this.cellDisplay.getPoints().addAll(x,y);
+                // also calculate distance from camera to cell center
+                totalZ += pointViewMap.get(v).getzOrder();
             }
+            this.zOrder = totalZ/cell.getPoints().size();
         }
 
     }
