@@ -141,10 +141,10 @@ public class Main3D extends Application {
         cellViews.sort((a,b) -> Double.compare(b.getzOrder(), a.getzOrder()));
         // move cell views and corresponding point views to front based on order
         for(CellView cellView : cellViews) {
-            cellView.getCellDisplay().toFront();
             for(Point3D v : cellView.getCell().getPoints()) {
-                pointViewMap.get(v).getPointDisplay().toFront();
+                pointViewMap.get(v).getPointDisplay().toBack();
             }
+            cellView.getCellDisplay().toBack();
         }
     }
 
