@@ -15,8 +15,8 @@ public class SphericalVoronoi {
         double lat = Math.toRadians(latDeg);
         double lon = Math.toRadians(lonDeg);
         double x = Math.cos(lat) * Math.cos(lon);
-        double y = Math.cos(lat) * Math.sin(lon);
-        double z = Math.sin(lat);
+        double z = Math.cos(lat) * Math.sin(lon);
+        double y = Math.sin(lat);
         return new Point3D(x, y, z);
     }
     // --- project from 3D to 2D ---
@@ -34,11 +34,11 @@ public class SphericalVoronoi {
 
     static Point3D projectTo3D(Point point) {
         double px = point.getX();
-        double py = point.getY();
-        double denom = 1 + px * px + py * py;
+        double pz = point.getY();
+        double denom = 1 + px * px + pz * pz;
         double x = 2 * px / denom;
-        double y = 2 * py / denom;
-        double z = (-1 + px * px + py * py) / denom;
+        double z = 2 * pz / denom;
+        double y = (-1 + px * px + pz * pz) / denom;
         return new Point3D(x, y, z);
 
     }
@@ -67,7 +67,7 @@ public class SphericalVoronoi {
 
     public static List<Point3D> sortAroundSite(Point3D site, Collection<Point3D> circumcenters) {
         // Basis for tangent plane
-        Point3D north = new Point3D(0,0,1);
+        Point3D north = new Point3D(0,1,0);
         Point3D u = Util.cross(north, site);
         if (Util.length(u) < 1e-8) { // site near north pole
             north = new Point3D(0,1,0);
@@ -218,8 +218,8 @@ public class SphericalVoronoi {
         }
         List<Edge> planarHullEdges = new ArrayList<>(planarHullEdgesMap.values());
         // create triangles
-        Point3D northPole = new Point3D(0, 0, 1);
-        delaunayVertexes.add(northPole);
+        Point3D northPole = new Point3D(0, 1, 0);
+        pointList.add(northPole);
         for (Edge edge : planarHullEdges) {
             Point3D a;
             Point3D b;
@@ -284,33 +284,33 @@ public class SphericalVoronoi {
 
         // --- 8. sanity check --- (Currently doesn't worth, there might be an issue with the code)
 
-        // // check euler characteristic for the voronoi graph (V - E + F = 2)
-        // int V = voronoiPoints.size();
-        // int E = 0;
-        // for (VoronoiCell3D cell : cells) {
-        //     E += cell.getEdges().size();
-        // }
-        // int F = cells.size();
-        // E = E / 2; // each edge is counted twice
-        // int euler = V - E + F;
-        // if (euler != 2) {
-        //     throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
-        //     V + " - " + E + " + " + F + " = " + euler + " != 2");
-        // }
+        // check euler characteristic for the voronoi graph (V - E + F = 2)
+        int V = voronoiPoints.size();
+        int E = 0;
+        for (VoronoiCell3D cell : cells) {
+            E += cell.getEdges().size();
+        }
+        int F = cells.size();
+        E = E / 2; // each edge is counted twice
+        int euler = V - E + F;
+        if (euler != 2) {
+            throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
+            V + " - " + E + " + " + F + " = " + euler + " != 2");
+        }
 
         // calculate euler characteristic for the delaunay graph
-        // int V = pointList.size();
-        // int E = 0;
-        // for (Point3D p : pointList) {
-        //     E += p.getEdges().size();
-        // }
-        // int F = delaunayTriangles.size();
-        // E = E / 2; // each edge is counted twice
-        // int euler = V - E + F;
-        // if (euler != 2) {
-        //     throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
-        //     V + " - " + E + " + " + F + " = " + euler + " != 2");
-        // }
+        V = pointList.size();
+        E = 0;
+        for (Point3D p : pointList) {
+            E += p.getEdges().size();
+        }
+        F = delaunayTriangles.size();
+        E = E / 2; // each edge is counted twice
+        euler = V - E + F;
+        if (euler != 2) {
+            throw new IllegalStateException("Euler characteristic failed: V - E + F = " + 
+            V + " - " + E + " + " + F + " = " + euler + " != 2");
+        }
 
         // --- 9. save variables ---
 

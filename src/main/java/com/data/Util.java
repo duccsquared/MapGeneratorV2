@@ -76,8 +76,8 @@ public class Util {
         double phi = Math.acos(2 * v - 1); // colatitude
 
         double x = Math.sin(phi) * Math.cos(theta);
-        double y = Math.sin(phi) * Math.sin(theta);
-        double z = Math.cos(phi);
+        double z = Math.sin(phi) * Math.sin(theta);
+        double y = Math.cos(phi);
         return new Point3D(x, y, z);
     }
 
