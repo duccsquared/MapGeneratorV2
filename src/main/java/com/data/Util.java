@@ -40,12 +40,16 @@ public class Util {
         return new Point3D(p.x*s, p.y*s, p.z*s);
     }
 
+    public static Point3D negative(Point3D p) {
+        return new Point3D(-p.x, -p.y, -p.z);
+    }
+
     public static Point3D normalize(Point3D p) {
         double len = length((p));
         return new Point3D(p.x / len, p.y / len, p.z / len);
     }
 
-    public static Point3D rotateZ(Point3D p, double angle) { // yaw
+    public static Point3D rotateZ(Point3D p, double angle) { // roll
         double cos = Math.cos(angle), sin = Math.sin(angle);
         double x = cos * p.x - sin * p.y;
         double y = sin * p.x + cos * p.y;
@@ -59,7 +63,7 @@ public class Util {
         return new Point3D(p.x, y, z);
     }
 
-    public static Point3D rotateY(Point3D p, double angle) { // roll
+    public static Point3D rotateY(Point3D p, double angle) { // yaw
         double cos = Math.cos(angle), sin = Math.sin(angle);
         double x = cos * p.x + sin * p.z;
         double z = -sin * p.x + cos * p.z;
