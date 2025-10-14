@@ -281,7 +281,7 @@ public class SphericalVoronoi {
 
         }
 
-        // --- 8. sanity check --- (Currently doesn't worth, there might be an issue with the code)
+        // --- 8. sanity check --- 
 
         // check euler characteristic for the voronoi graph (V - E + F = 2)
         int V = voronoiPoints.size();
