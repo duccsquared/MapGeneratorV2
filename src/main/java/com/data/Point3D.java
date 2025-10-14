@@ -116,7 +116,7 @@ public class Point3D {
             return this.name;
         }
         else {
-            return String.format("(%.3f, %.3f, %.3f)",this.getX(),this.getY(),this.getY());
+            return String.format("(%.3f, %.3f, %.3f)",this.getX(),this.getY(),this.getZ());
         }
     }
 }
