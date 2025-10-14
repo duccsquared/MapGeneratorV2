@@ -55,7 +55,6 @@ public class SphericalVoronoi {
         double projLen = Util.length(proj);
         if (projLen < 1e-12) {
             // Degenerate: circumcenter lies (almost) on the site direction.
-            // Return some angle based on e.g. dot with e1.
             return 0.0;
         }
         Point3D p = new Point3D(proj.x / projLen, proj.y / projLen, proj.z / projLen);
@@ -70,7 +69,7 @@ public class SphericalVoronoi {
         Point3D north = new Point3D(0,1,0);
         Point3D u = Util.cross(north, site);
         if (Util.length(u) < 1e-8) { // site near north pole
-            north = new Point3D(0,1,0);
+            north = new Point3D(1, 0, 0); // pick a different north pole
             u = Util.cross(north, site);
         }
         Point3D e1 = Util.normalize(u);
