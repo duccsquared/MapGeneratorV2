@@ -124,12 +124,14 @@ public class SphericalVoronoi {
         // samplePoints.add(Util.getRandomLatLongPoint());
         // }
 
+        double goldenRatio = (1 + Math.pow(5,0.5))/2.0;
+        double n = 200;
         double u = 0;
         double v = 0.98;
-        for (int i = 0; i < 98; i++) {
+        for (int i = 0; i < n; i++) {
             samplePoints.add(Util.getPointByLatLong(u, v));
-            v -= 0.01;
-            u += 0.12;
+            v -= 0.98/n;
+            u += 1/goldenRatio;
             if (u > 1) {
                 u -= 1;
             }
