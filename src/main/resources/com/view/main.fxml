@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import com.view.Renderer3DPane?>
+
+
+<SplitPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.controller.MainController"
+            dividerPositions="0.6">
+    <items>
+        <Renderer3DPane fx:id="rendererPane"/>
+        <VBox spacing="10" alignment="CENTER">
+            <Label text="Placeholder Section"/>
+            <Label text="Status: Ready" fx:id="statusLabel" />
+            <!-- <Button text="Add Point" onAction="#addPoint"/>
+            <Button text="Remove Point" onAction="#removePoint"/> -->
+        </VBox>
+    </items>
+</SplitPane>

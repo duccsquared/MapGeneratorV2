@@ -10,9 +10,11 @@ import com.data.SphericalVoronoi;
 import com.data.Util;
 import com.data.VoronoiCell3D;
 
+import javafx.geometry.Bounds;
 import javafx.scene.layout.Pane;
 
 public class Renderer3DPane extends Pane {
+    // graph
     SphericalVoronoi sphericalVoronoi;
     // point views
     List<PointView> pointViews = new ArrayList<>();
@@ -32,10 +34,15 @@ public class Renderer3DPane extends Pane {
     // World Axes
     WorldAxes worldAxes;
     
-    public Renderer3DPane(SphericalVoronoi sphericalVoronoi) {
+    public Renderer3DPane() {
         super();
+        initialize();
+    }
+
+    void initialize() {
         updateCameraCoords();
         // set graph
+        SphericalVoronoi sphericalVoronoi = new SphericalVoronoi();
         this.sphericalVoronoi = sphericalVoronoi;
 
         // setup world axes
@@ -54,9 +61,19 @@ public class Renderer3DPane extends Pane {
             cellViews.add(cellView);
         }
 
-        // update to ensure correctness
-        updateAll();
+        // update to ensure correctness after initialization
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.millis(100));
+        pause.setOnFinished(event -> updateAll());
+        pause.play();
 
+        // update on window size change
+        this.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            updateAll();
+        });
+
+        this.localToSceneTransformProperty().addListener((obs, oldTransform, newTransform) -> {
+            updateAll();
+        });
     }
     
     public Map<Point3D, PointView> getPointViewMap() {
@@ -137,10 +154,28 @@ public class Renderer3DPane extends Pane {
 
 
         // 3) viewport mapping
-        double x = 100 + (xProj + 1)/2 * 400;
-        double y = (1 - yProj)/2 * 400;
+        double[] viewport = calculateViewport();
+        double x = viewport[0] + (xProj + 1) / 2 * viewport[2];
+        double y = viewport[1] + (1 - yProj) / 2 * viewport[2];
 
         return new double[]{x,y};
+    }
+
+    public double[] calculateViewport() {
+        // get bounds
+        Bounds b = this.localToScene(this.getLayoutBounds());
+        // get base range
+        double minX = b.getMinX();
+        double minY = b.getMinY();
+        double width = b.getWidth();
+        double height = b.getHeight();
+        // get de-facto size (ensures 1:1 aspect ratio)
+        double size = Math.min(b.getWidth(),b.getHeight());
+        // recalculate start points to center render on the pane
+        minX += width/2 * (1 - (size/width));
+        minY += height/2 * (1 - (size/height));
+
+        return new double[]{minX, minY, size};
     }
 
 }
