@@ -1,26 +1,36 @@
 package com.view;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 import com.data.Point3D;
 import com.data.SphericalVoronoi;
 import com.data.Util;
 import com.data.VoronoiCell3D;
 
-import javafx.geometry.Bounds;
+import javafx.application.Platform;
+// import javafx.geometry.Bounds;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class Renderer3DPane extends Pane {
+    private final Canvas canvas = new Canvas();
+    // index mapping for fast access
+    private Point3D[] pointsArray;
+    private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
+    // cells store indices to pointsArray
+    private List<int[]> cellPointIndexLists = new ArrayList<>();
+    private Map<Integer,Color> cellIndexColorMap = new HashMap<>();
+    // arrays for projected results (x,y) and z-order
+    private double[] projX;
+    private double[] projY;
+    private double[] zOrderArr;
+
     // graph
     SphericalVoronoi sphericalVoronoi;
-    // point views
-    List<PointView> pointViews = new ArrayList<>();
-    Map<Point3D,PointView> pointViewMap = new HashMap<>();
-    // cell views
-    List<CellView> cellViews = new ArrayList<>();
     // location of camera in the worldspace
     Point3D cameraPosition = new Point3D(0,0,4);
     // location the camera is looking at
@@ -31,34 +41,43 @@ public class Renderer3DPane extends Pane {
     Point3D cameraX; Point3D cameraY; Point3D cameraZ; Point3D cameraTranslation;
     // camera rotations relative to starting location
     double yaw = 0; double pitch = 0;
-    // World Axes
-    WorldAxes worldAxes;
-    
+
+    // Executor for optional parallel computation (uses common pool)
+    private final ExecutorService exec = ForkJoinPool.commonPool();
+
     public Renderer3DPane() {
         super();
+        getChildren().add(canvas);
         initialize();
     }
 
     void initialize() {
         updateCameraCoords();
         // set graph
-        SphericalVoronoi sphericalVoronoi = new SphericalVoronoi();
-        this.sphericalVoronoi = sphericalVoronoi;
+        sphericalVoronoi = new SphericalVoronoi();
 
-        // setup world axes
-        worldAxes = new WorldAxes(this, 2);
+        // build arrays and mappings
+        Collection<Point3D> verts = sphericalVoronoi.getVertexes().values();
+        pointsArray = verts.toArray(new Point3D[0]);
+        int n = pointsArray.length;
+        projX = new double[n];
+        projY = new double[n];
+        zOrderArr = new double[n];
 
-        // calculate views
-        for(Point3D point3d : sphericalVoronoi.getVertexes().values()) {
-            PointView pointView = new PointView(point3d, this);
-            pointViews.add(pointView);
-            pointViewMap.put(point3d, pointView);
+        for (int i = 0; i < n; i++) {
+            pointIndexMap.put(pointsArray[i], i);
         }
 
-        
-        for(VoronoiCell3D cell3d: sphericalVoronoi.getCells()) {
-            CellView cellView = new CellView(cell3d, this);
-            cellViews.add(cellView);
+        // convert cells to index arrays for cheap drawing
+        for (VoronoiCell3D cell : sphericalVoronoi.getCells()) {
+            List<Point3D> point3ds = cell.getPoints();
+            int[] pointIndexes = new int[point3ds.size()];
+            // loop through each each point to get the corresponding ID
+            for (int i = 0; i < point3ds.size(); i++) {
+                Integer id = pointIndexMap.get(point3ds.get(i));
+                pointIndexes[i] = (id == null) ? -1 : id;
+            }
+            cellPointIndexLists.add(pointIndexes);
         }
 
         // update to ensure correctness after initialization
@@ -68,16 +87,10 @@ public class Renderer3DPane extends Pane {
 
         // update on window size change
         this.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            canvas.setWidth(newBounds.getWidth());
+            canvas.setHeight(newBounds.getHeight());
             updateAll();
         });
-
-        this.localToSceneTransformProperty().addListener((obs, oldTransform, newTransform) -> {
-            updateAll();
-        });
-    }
-    
-    public Map<Point3D, PointView> getPointViewMap() {
-        return pointViewMap;
     }
     public double getPitch() {
         return pitch;
@@ -94,25 +107,92 @@ public class Renderer3DPane extends Pane {
 
     public void updateAll() {
         updateCameraCoords();
-        worldAxes.update();
-        for(PointView pointView : pointViews) {
-            pointView.update();
-            pointView.setzOrder(Util.dot(pointView.getPoint(), cameraZ) + cameraTranslation.getZ());
+
+        // compute viewport
+        double[] viewport = calculateViewport();
+
+        // compute projection for each point (parallel when large)
+        final int n = pointsArray.length;
+        // choose to parallelize if array sufficiently large
+        if (n > 5000) {
+            IntStream.range(0, n).parallel().forEach(i -> {
+                projectPointToArrays(pointsArray[i], viewport, i);
+            });
+        } else {
+            for (int i = 0; i < n; i++) {
+                projectPointToArrays(pointsArray[i], viewport, i);
+            }
         }
 
-        for(CellView cellView : cellViews) {
-            cellView.update();
-        }
-        // sort cellviews by z-order
-        cellViews.sort((a,b) -> Double.compare(b.getzOrder(), a.getzOrder()));
-        // move cell views and corresponding point views to front based on order
-        for(CellView cellView : cellViews) {
-            for(Point3D v : cellView.getCell().getPoints()) {
-                pointViewMap.get(v).getPointDisplay().toBack();
+        // compute cell z-order averages
+        // (single-threaded; cheap compared to per-point work)
+        final double[] cellZ = new double[cellPointIndexLists.size()];
+        for (int cellIndex = 0; cellIndex < cellPointIndexLists.size(); cellIndex++) {
+            int[] pointIndexes = cellPointIndexLists.get(cellIndex);
+            double total = 0;
+            int count = 0;
+            for (int pointIndex : pointIndexes) {
+                if (pointIndex >= 0) {
+                    total += zOrderArr[pointIndex];
+                    count++;
+                }
             }
-            cellView.getCellDisplay().toBack();
+            cellZ[cellIndex] = (count > 0) ? (total / count) : Double.NEGATIVE_INFINITY;
         }
+
+        // draw on FX thread
+        Platform.runLater(() -> {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            // Clear
+            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+            // draw cells sorted by z-order (back -> front)
+            Integer[] order = IntStream.range(0, cellPointIndexLists.size()).boxed().toArray(Integer[]::new);
+            Arrays.sort(order, Comparator.comparingDouble(i -> cellZ[i]));
+
+            for (int cellIndex : order) {
+                int[] pointIndexes = cellPointIndexLists.get(cellIndex);
+                // skip invalid
+                if (pointIndexes.length == 0) continue;
+                // build polygon arrays
+                int valid = 0;
+                for (int pointIndex : pointIndexes) if (pointIndex >= 0) valid++;
+                if (valid < 3) continue; // cannot draw polygon
+
+                double[] xs = new double[valid];
+                double[] ys = new double[valid];
+                int p = 0;
+                for (int pointIndex : pointIndexes) {
+                    if (pointIndex < 0) continue;
+                    xs[p] = projX[pointIndex];
+                    ys[p] = projY[pointIndex];
+                    p++;
+                }
+                // random color per cell
+                // gc.setFill(Color.hsb((cellIndex * 47) % 360, 0.4, 0.95, 1.0));
+                if(!cellIndexColorMap.containsKey(cellIndex)) {
+                    cellIndexColorMap.put(cellIndex, Color.color(Math.random(), Math.random(), Math.random(), 1));
+                }
+                gc.setFill(cellIndexColorMap.get(cellIndex));
+                gc.fillPolygon(xs, ys, xs.length);
+                gc.setStroke(Color.BLACK);
+                gc.strokePolygon(xs, ys, xs.length);
+            }
+
+            // draw points on top
+            // gc.setFill(Color.BLACK);
+            // final double pointRadius = 3;
+            // for (int i = 0; i < n; i++) {
+            //     double x = projX[i];
+            //     double y = projY[i];
+            //     // optional simple frustum cull
+            //     if (Double.isFinite(x) && Double.isFinite(y)) {
+            //         gc.fillOval(x - pointRadius, y - pointRadius, pointRadius * 2, pointRadius * 2);
+            //     }
+            // }
+        });
     }
+
 
     void updateCameraCoords() {
         // clamp pitch
@@ -138,8 +218,8 @@ public class Renderer3DPane extends Pane {
         cameraTranslation = new Point3D(-Util.dot(cameraX,adjustedCameraPosition), -Util.dot(cameraY,adjustedCameraPosition), Util.dot(cameraZ,adjustedCameraPosition));
     }
 
-    public double[] calculateProjectedPosition(Point3D point3d) {
 
+    private void projectPointToArrays(Point3D point3d, double[] viewport, int pointIndex) {
         // 1) view transformation
         Point3D viewAdjustedPoint = new Point3D(
             Util.dot(point3d,cameraX) + cameraTranslation.getX(),
@@ -152,25 +232,22 @@ public class Renderer3DPane extends Pane {
         double xProj = (viewAdjustedPoint.getX() * fovScale) / -viewAdjustedPoint.getZ();
         double yProj = (viewAdjustedPoint.getY() * fovScale) / -viewAdjustedPoint.getZ();
 
-
-        // 3) viewport mapping
-        double[] viewport = calculateViewport();
         double x = viewport[0] + (xProj + 1) / 2 * viewport[2];
         double y = viewport[1] + (1 - yProj) / 2 * viewport[2];
 
-        return new double[]{x,y};
+        projX[pointIndex] = x;
+        projY[pointIndex] = y;
+        zOrderArr[pointIndex] = viewAdjustedPoint.getZ(); // use view-space z for depth (higher generally nearer)
     }
 
     public double[] calculateViewport() {
         // get bounds
-        Bounds b = this.localToScene(this.getLayoutBounds());
-        // get base range
-        double minX = b.getMinX();
-        double minY = b.getMinY();
-        double width = b.getWidth();
-        double height = b.getHeight();
+        double minX = 0; 
+        double minY = 0;
+        double width = canvas.getWidth();
+        double height = canvas.getHeight();
         // get de-facto size (ensures 1:1 aspect ratio)
-        double size = Math.min(b.getWidth(),b.getHeight());
+        double size = Math.min(width, height);
         // recalculate start points to center render on the pane
         minX += width/2 * (1 - (size/width));
         minY += height/2 * (1 - (size/height));
@@ -178,4 +255,8 @@ public class Renderer3DPane extends Pane {
         return new double[]{minX, minY, size};
     }
 
+    // Call this to shutdown executor if needed
+    public void dispose() {
+        exec.shutdownNow();
+    }
 }
