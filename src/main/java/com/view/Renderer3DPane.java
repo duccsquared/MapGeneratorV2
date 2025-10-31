@@ -21,6 +21,7 @@ public class Renderer3DPane extends Pane {
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
+    private Map<Integer,Color> pointIndexColorMap = new HashMap<>();
     // cells store indices to pointsArray
     private List<int[]> cellPointIndexLists = new ArrayList<>();
     private Map<Integer,Color> cellIndexColorMap = new HashMap<>();
@@ -150,10 +151,21 @@ public class Renderer3DPane extends Pane {
             Integer[] order = IntStream.range(0, cellPointIndexLists.size()).boxed().toArray(Integer[]::new);
             Arrays.sort(order, Comparator.comparingDouble(i -> cellZ[i]));
 
+            boolean[] drawn = new boolean[pointsArray.length];
             for (int cellIndex : order) {
                 int[] pointIndexes = cellPointIndexLists.get(cellIndex);
                 // skip invalid
                 if (pointIndexes.length == 0) continue;
+                
+                //  backface culling
+                Point3D p0 = pointsArray[pointIndexes[0]];
+                Point3D p1 = pointsArray[pointIndexes[1]];
+                Point3D p2 = pointsArray[pointIndexes[2]];
+                Point3D u = Util.subtract(p1, p0);
+                Point3D v = Util.subtract(p2, p0);
+                Point3D normal = Util.cross(u, v);
+                if (Util.dot(normal, cameraZ) < 0) continue; // skip backface
+
                 // build polygon arrays
                 int valid = 0;
                 for (int pointIndex : pointIndexes) if (pointIndex >= 0) valid++;
@@ -168,6 +180,7 @@ public class Renderer3DPane extends Pane {
                     ys[p] = projY[pointIndex];
                     p++;
                 }
+
                 // random color per cell
                 // gc.setFill(Color.hsb((cellIndex * 47) % 360, 0.4, 0.95, 1.0));
                 if(!cellIndexColorMap.containsKey(cellIndex)) {
@@ -177,19 +190,22 @@ public class Renderer3DPane extends Pane {
                 gc.fillPolygon(xs, ys, xs.length);
                 gc.setStroke(Color.BLACK);
                 gc.strokePolygon(xs, ys, xs.length);
-            }
 
-            // draw points on top
-            // gc.setFill(Color.BLACK);
-            // final double pointRadius = 3;
-            // for (int i = 0; i < n; i++) {
-            //     double x = projX[i];
-            //     double y = projY[i];
-            //     // optional simple frustum cull
-            //     if (Double.isFinite(x) && Double.isFinite(y)) {
-            //         gc.fillOval(x - pointRadius, y - pointRadius, pointRadius * 2, pointRadius * 2);
-            //     }
-            // }
+                // draw points comprising the cell
+                for (int pointIndex : pointIndexes) {
+                    // if (pointIndex < 0 || drawn[pointIndex]) continue;
+                    double x = projX[pointIndex];
+                    double y = projY[pointIndex];
+                    if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
+                    final int r = 3;
+                    if(!pointIndexColorMap.containsKey(pointIndex)) {
+                        pointIndexColorMap.put(pointIndex, Color.color(Math.random()/3, Math.random()/3, Math.random()/3, 1));
+                    }
+                    gc.setFill(pointIndexColorMap.get(pointIndex));
+                    gc.fillOval(x - r, y - r, 2*r, 2*r);
+                    drawn[pointIndex] = true;
+                }
+            }
         });
     }
 
