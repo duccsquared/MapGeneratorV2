@@ -49,14 +49,20 @@ public class Renderer3DPane extends Pane {
     public Renderer3DPane() {
         super();
         getChildren().add(canvas);
-        initialize();
+        initialize(new SphericalVoronoi());
     }
 
-    void initialize() {
+    public void initialize(SphericalVoronoi sphericalVoronoi) {
         updateCameraCoords();
         // set graph
-        sphericalVoronoi = new SphericalVoronoi();
+        this.sphericalVoronoi = sphericalVoronoi;
 
+        // reset variables
+        pointIndexMap = new HashMap<>();
+        pointIndexColorMap = new HashMap<>();
+        cellPointIndexLists = new ArrayList<>();
+        cellIndexColorMap = new HashMap<>();
+        
         // build arrays and mappings
         Collection<Point3D> verts = sphericalVoronoi.getVertexes().values();
         pointsArray = verts.toArray(new Point3D[0]);

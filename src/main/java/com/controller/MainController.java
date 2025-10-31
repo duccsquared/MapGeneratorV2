@@ -3,6 +3,7 @@ package com.controller;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.data.SphericalVoronoi;
 import com.view.Renderer3DPane;
 
 import javafx.animation.AnimationTimer;
@@ -10,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 
 public class MainController {
@@ -20,8 +22,6 @@ public class MainController {
 
     // Called from Main3D after scene creation
     public void initializeKeyTracking(Scene scene) {
-        scene.setOnKeyPressed(event -> pressedKeys.add(event.getCode()));
-        scene.setOnKeyReleased(event -> pressedKeys.remove(event.getCode()));
 
         AnimationTimer loop = new AnimationTimer() {
             private long lastUpdate = 0;
@@ -33,6 +33,23 @@ public class MainController {
                 }
             }
         };
+
+        rendererPane.setFocusTraversable(true);
+        rendererPane.requestFocus();
+        rendererPane.setOnMouseClicked(event -> rendererPane.requestFocus());
+        rendererPane.setOnKeyPressed(event -> pressedKeys.add(event.getCode()));
+        rendererPane.setOnKeyReleased(event -> pressedKeys.remove(event.getCode()));
+        rendererPane.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode().isArrowKey()) {
+                // detect key pressed vs key released
+                if (event.getEventType() == KeyEvent.KEY_PRESSED) {
+                    pressedKeys.add(event.getCode());
+                } else if (event.getEventType() == KeyEvent.KEY_RELEASED) {
+                    pressedKeys.remove(event.getCode());
+                }
+                event.consume(); // prevent focus traversal
+            }
+        });
         loop.start();
     }
 
@@ -48,6 +65,11 @@ public class MainController {
         rendererPane.setYaw(rendererPane.getYaw()+0.025);
         statusLabel.setText("Rotated right");
         rendererPane.updateAll();
+    }
+
+    @FXML
+    private void reloadGraph() {
+        rendererPane.initialize(new SphericalVoronoi());
     }
 
     private void handleKeys() {

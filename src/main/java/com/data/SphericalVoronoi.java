@@ -120,7 +120,7 @@ public class SphericalVoronoi {
         // --- 1. generate points ---
 
         ArrayList<Point3D> samplePoints = new ArrayList<>();
-        // for(int i = 0; i < 100; i++) {
+        // for(int i = 0; i < 200; i++) {
         // samplePoints.add(Util.getRandomLatLongPoint());
         // }
 
@@ -129,7 +129,7 @@ public class SphericalVoronoi {
         double u = 0;
         double v = 0.98;
         for (int i = 0; i < n; i++) {
-            samplePoints.add(Util.getPointByLatLong(u, v));
+            samplePoints.add(Util.getPointByLatLong(u + 3*Util.randRange(-0.98/n, 0.98/n), v + 3*Util.randRange(-0.98/n, 0.98/n)));
             v -= 0.98/n;
             u += 1/goldenRatio;
             if (u > 1) {
