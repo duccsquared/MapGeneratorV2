@@ -1,11 +1,11 @@
-package com.data;
+package com.model.Util;
 
 import java.util.Objects;
 
-class EdgeKey {
+public class EdgeKey {
     int u, v;
 
-    EdgeKey(int a, int b) {
+    public EdgeKey(int a, int b) {
         this.u = Math.min(a, b);
         this.v = Math.max(a, b);
     }

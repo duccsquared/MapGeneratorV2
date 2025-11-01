@@ -1,4 +1,7 @@
-package com.data;
+package com.model.Util;
+
+import com.model.Graph2D.Point;
+import com.model.Graph3D.Point3D;
 
 public class Util {
     public static int randInt(int a, int b) {

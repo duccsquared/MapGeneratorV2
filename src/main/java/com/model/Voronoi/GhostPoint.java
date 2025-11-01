@@ -1,4 +1,6 @@
-package com.data;
+package com.model.Voronoi;
+
+import com.model.Graph2D.Point;
 
 public class GhostPoint extends Point {
     private Point point;

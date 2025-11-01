@@ -1,16 +1,16 @@
-package com.data;
+package com.model.Graph2D;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
-public class Edge3D {
+import com.model.Util.EdgeKey;
+import com.model.Util.OrderedUniqueList;
 
-    private OrderedUniqueList<Point3D> points;
-    private OrderedUniqueList<Polygon3D> polygons;
+public class Edge {
+    private OrderedUniqueList<Point> points;
+    private OrderedUniqueList<Polygon> polygons;
 
-    Edge3D(Point3D p1, Point3D p2) {
+    public Edge(Point p1, Point p2) {
         // define variables
         this.points = new OrderedUniqueList<>();
         this.polygons = new OrderedUniqueList<>();
@@ -26,9 +26,9 @@ public class Edge3D {
         p2.addEdge(this);
     }
 
-    public Point3D other(Point3D point) {
+    public Point other(Point point) {
         // loop through points; return other point
-        for(Point3D p: this.points) {
+        for(Point p: this.points) {
             if(point!=p) {
                 return p;
             }
@@ -36,25 +36,25 @@ public class Edge3D {
         return null;
     }
 
-    public Point3D getP1() {return this.points.get(0);}
-    public Point3D getP2() {return this.points.get(1);}
+    public Point getP1() {return this.points.get(0);}
+    public Point getP2() {return this.points.get(1);}
 
-    public List<Point3D> getPoints() {return this.points.getImmutableList();}
-    public List<Polygon3D> getPolygons() {return this.polygons.getImmutableList();}
+    public List<Point> getPoints() {return this.points.getImmutableList();}
+    public List<Polygon> getPolygons() {return this.polygons.getImmutableList();}
 
-    public boolean addPolygon(Polygon3D polygon) {
+    public boolean addPolygon(Polygon polygon) {
         // if(this.polygons.size()>=2) {
         //     throw new IllegalStateException("Edges can only have a maximum of two polygons");
         // }
         return this.polygons.add(polygon);
     }
-    public boolean removePolygon(Polygon3D polygon) {
+    public boolean removePolygon(Polygon polygon) {
         return this.polygons.remove(polygon);
     }
 
     public void delete(boolean removePoints) {
         // remove self from edges
-        for(Point3D point: this.points) {
+        for(Point point: this.points) {
             point.removeEdge(this);
             // delete points
             if(removePoints) {
@@ -67,7 +67,7 @@ public class Edge3D {
 
     public String toString() {
         List<String> pointStrings = new ArrayList<>();
-        for(Point3D point: this.points) {
+        for(Point point: this.points) {
             String pointString = String.format(point.toStringShort());
             pointStrings.add(pointString);
         }
@@ -76,8 +76,8 @@ public class Edge3D {
 
     @Override 
     public boolean equals(Object other) {
-        if(other instanceof Edge3D) {
-            Edge3D vOther = (Edge3D) other;
+        if(other instanceof Edge) {
+            Edge vOther = (Edge) other;
             return this.getEdgeKey().equals(vOther.getEdgeKey());
             // return (this.getP1().equals(vOther.getP1()) && this.getP2().equals(vOther.getP2())) || (this.getP1().equals(vOther.getP2()) && this.getP2().equals(vOther.getP1()));
         }

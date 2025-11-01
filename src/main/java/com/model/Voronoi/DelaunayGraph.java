@@ -1,9 +1,15 @@
-package com.data;
+package com.model.Voronoi;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.model.Graph2D.Circumcircle;
+import com.model.Graph2D.Edge;
+import com.model.Graph2D.Point;
+import com.model.Graph2D.Triangle;
+import com.model.Util.Util;
 
 import lombok.*;
 

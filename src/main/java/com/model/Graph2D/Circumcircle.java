@@ -1,4 +1,4 @@
-package com.data;
+package com.model.Graph2D;
 
 import lombok.*;
 

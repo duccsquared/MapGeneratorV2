@@ -1,9 +1,9 @@
 package com;
 
-import com.data.DelaunayGraph;
-import com.data.Edge;
-import com.data.Point;
-import com.data.VoronoiGraph;
+import com.model.Graph2D.Edge;
+import com.model.Graph2D.Point;
+import com.model.Voronoi.DelaunayGraph;
+import com.model.Voronoi.VoronoiGraph;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

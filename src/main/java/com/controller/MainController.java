@@ -3,7 +3,7 @@ package com.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.data.SphericalVoronoi;
+import com.model.Voronoi.SphericalVoronoi;
 import com.view.Renderer3DPane;
 
 import javafx.animation.AnimationTimer;

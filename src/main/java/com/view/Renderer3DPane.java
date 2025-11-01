@@ -4,10 +4,10 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
-import com.data.Point3D;
-import com.data.SphericalVoronoi;
-import com.data.Util;
-import com.data.VoronoiCell3D;
+import com.model.Graph3D.Point3D;
+import com.model.Graph3D.VoronoiCell3D;
+import com.model.Util.Util;
+import com.model.Voronoi.SphericalVoronoi;
 
 import javafx.application.Platform;
 // import javafx.geometry.Bounds;

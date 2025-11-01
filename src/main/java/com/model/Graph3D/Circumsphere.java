@@ -1,4 +1,6 @@
-package com.data;
+package com.model.Graph3D;
+
+import com.model.Util.Util;
 
 import lombok.*;
 

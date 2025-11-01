@@ -1,4 +1,4 @@
-package com.data;
+package com.model.Graph3D;
 
 import java.util.ArrayList;
 import java.util.List;

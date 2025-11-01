@@ -1,4 +1,4 @@
-package com.data;
+package com.model.Voronoi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +7,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.model.Graph2D.Edge;
+import com.model.Graph2D.Point;
+import com.model.Graph2D.Triangle;
+import com.model.Graph3D.Circumsphere;
+import com.model.Graph3D.Edge3D;
+import com.model.Graph3D.Point3D;
+import com.model.Graph3D.Polygon3D;
+import com.model.Graph3D.Triangle3D;
+import com.model.Graph3D.VoronoiCell3D;
+import com.model.Util.EdgeKey;
+import com.model.Util.Util;
 
 public class SphericalVoronoi {
 
