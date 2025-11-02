@@ -64,7 +64,7 @@ public class Renderer3DPane extends Pane {
         cellIndexColorMap = new HashMap<>();
         
         // build arrays and mappings
-        Collection<Point3D> verts = sphericalVoronoi.getVertexes().values();
+        Collection<Point3D> verts = sphericalVoronoi.getVoronoiPoints();
         pointsArray = verts.toArray(new Point3D[0]);
         int n = pointsArray.length;
         projX = new double[n];
@@ -76,7 +76,7 @@ public class Renderer3DPane extends Pane {
         }
 
         // convert cells to index arrays for cheap drawing
-        for (Polygon3D cell : sphericalVoronoi.getCells()) {
+        for (Polygon3D cell : sphericalVoronoi.getVoronoiCells()) {
             List<Point3D> point3ds = cell.getPoints();
             int[] pointIndexes = new int[point3ds.size()];
             // loop through each each point to get the corresponding ID
