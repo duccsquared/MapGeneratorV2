@@ -10,7 +10,6 @@ import com.model.Graph2D.Edge;
 import com.model.Graph2D.Point;
 import com.model.Graph2D.Polygon;
 import com.model.Graph2D.Triangle;
-import com.model.Graph2D.VoronoiCell;
 
 import lombok.*;
 
@@ -20,7 +19,7 @@ public class VoronoiGraph {
     private double width;
     private double height;
     private List<Point> points;
-    private List<VoronoiCell> cells;
+    private List<Polygon> cells;
 
     public VoronoiGraph(DelaunayGraph delaunayGraph) {
         this.points = new ArrayList<>();
@@ -71,7 +70,7 @@ public class VoronoiGraph {
                         throw new IllegalArgumentException("edge with incorrect number of triangles found");
                     }
                 }
-                VoronoiCell voronoiCell = new VoronoiCell(new ArrayList<>(cellPointSet), new ArrayList<>(cellEdgeSet));
+                Polygon voronoiCell = new Polygon(new ArrayList<>(cellPointSet), new ArrayList<>(cellEdgeSet));
                 cells.add(voronoiCell);
 
 

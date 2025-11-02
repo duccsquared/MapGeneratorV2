@@ -27,7 +27,13 @@ public class Polygon3D {
         }
         for (Edge3D edge : edges) {
             this.edges.add(edge);
+            edge.addPolygon(this);
         }
+    }
+
+    public Polygon3D(Point3D site, List<Point3D> vertices) {
+        this(vertices,calculateEdgesByVertices(vertices));
+        this.setCenter(site);
     }
 
     public List<Point3D> getPoints() {return points.getImmutableList();}
@@ -60,6 +66,18 @@ public class Polygon3D {
 
     public void delete() {
         this.delete(false, false);
+    }
+
+    static private List<Edge3D> calculateEdgesByVertices(List<Point3D> vertices) {
+        List<Edge3D> edges = new ArrayList<>();
+        for(Point3D vertex: vertices) {
+            for(Edge3D edge : vertex.getEdges()) {
+                if(vertices.contains(edge.getP1()) && vertices.contains(edge.getP2())) {
+                    edges.add(edge);
+                }
+            }
+        }
+        return edges;
     }
 
     public String toString() {

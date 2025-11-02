@@ -27,6 +27,7 @@ public class Polygon {
         }
         for (Edge edge : edges) {
             this.edges.add(edge);
+            edge.addPolygon(this);
         }
     }
 

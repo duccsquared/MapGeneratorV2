@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 import com.model.Graph3D.Point3D;
-import com.model.Graph3D.VoronoiCell3D;
+import com.model.Graph3D.Polygon3D;
 import com.model.Util.Util;
 import com.model.Voronoi.SphericalVoronoi;
 
@@ -76,7 +76,7 @@ public class Renderer3DPane extends Pane {
         }
 
         // convert cells to index arrays for cheap drawing
-        for (VoronoiCell3D cell : sphericalVoronoi.getCells()) {
+        for (Polygon3D cell : sphericalVoronoi.getCells()) {
             List<Point3D> point3ds = cell.getPoints();
             int[] pointIndexes = new int[point3ds.size()];
             // loop through each each point to get the corresponding ID

@@ -16,7 +16,6 @@ import com.model.Graph3D.Edge3D;
 import com.model.Graph3D.Point3D;
 import com.model.Graph3D.Polygon3D;
 import com.model.Graph3D.Triangle3D;
-import com.model.Graph3D.VoronoiCell3D;
 import com.model.Util.EdgeKey;
 import com.model.Util.Util;
 
@@ -101,7 +100,7 @@ public class SphericalVoronoi {
     private List<Point3D> delaunayVertexes = new ArrayList<>();
     private Map<Triangle3D, Point3D> vertexes = new HashMap<>();
     private List<Edge3D> edges = new ArrayList<>();
-    private List<VoronoiCell3D> cells = new ArrayList<>();
+    private List<Polygon3D> cells = new ArrayList<>();
 
     public List<Triangle3D> getTriangles() {
         return triangles;
@@ -119,7 +118,7 @@ public class SphericalVoronoi {
         return edges;
     }
 
-    public List<VoronoiCell3D> getCells() {
+    public List<Polygon3D> getCells() {
         return cells;
     }
 
@@ -266,7 +265,7 @@ public class SphericalVoronoi {
         }
 
         // --- 7. create Voronoi edges ---
-        List<VoronoiCell3D> cells = new ArrayList<>();
+        List<Polygon3D> cells = new ArrayList<>();
         for (Point3D point : pointList) {
             // cell variables
             Set<Point3D> cellpointList = new HashSet<>();
@@ -289,7 +288,7 @@ public class SphericalVoronoi {
                 }
             }
 
-            VoronoiCell3D voronoiCell = new VoronoiCell3D(new ArrayList<>(sortAroundSite(point, cellpointList)),
+            Polygon3D voronoiCell = new Polygon3D(new ArrayList<>(sortAroundSite(point, cellpointList)),
                     new ArrayList<>(cellEdgeMap.values()));
             cells.add(voronoiCell);
 
@@ -300,7 +299,7 @@ public class SphericalVoronoi {
         // check euler characteristic for the voronoi graph (V - E + F = 2)
         int V = voronoiPoints.size();
         int E = 0;
-        for (VoronoiCell3D cell : cells) {
+        for (Polygon3D cell : cells) {
             E += cell.getEdges().size();
         }
         int F = cells.size();
