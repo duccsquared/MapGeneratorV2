@@ -69,7 +69,8 @@ public class MainController {
 
     @FXML
     private void reloadGraph() {
-        rendererPane.initialize(new Voronoi3DGraph());
+        Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
+        rendererPane.initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
     }
 
     private void handleKeys() {

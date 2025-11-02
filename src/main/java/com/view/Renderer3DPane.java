@@ -31,7 +31,8 @@ public class Renderer3DPane extends Pane {
     private double[] zOrderArr;
 
     // graph
-    Voronoi3DGraph sphericalVoronoi;
+    List<Point3D> points;
+    List<Polygon3D> cells;
     // location of camera in the worldspace
     Point3D cameraPosition = new Point3D(0,0,4);
     // location the camera is looking at
@@ -49,13 +50,15 @@ public class Renderer3DPane extends Pane {
     public Renderer3DPane() {
         super();
         getChildren().add(canvas);
-        initialize(new Voronoi3DGraph());
+        Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
+        initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
     }
 
-    public void initialize(Voronoi3DGraph sphericalVoronoi) {
+    public void initialize(List<Point3D> points, List<Polygon3D> cells) {
         updateCameraCoords();
         // set graph
-        this.sphericalVoronoi = sphericalVoronoi;
+        this.points = points;
+        this.cells = cells;
 
         // reset variables
         pointIndexMap = new HashMap<>();
@@ -64,8 +67,7 @@ public class Renderer3DPane extends Pane {
         cellIndexColorMap = new HashMap<>();
         
         // build arrays and mappings
-        Collection<Point3D> verts = sphericalVoronoi.getVoronoiPoints();
-        pointsArray = verts.toArray(new Point3D[0]);
+        pointsArray = points.toArray(new Point3D[0]);
         int n = pointsArray.length;
         projX = new double[n];
         projY = new double[n];
@@ -76,7 +78,7 @@ public class Renderer3DPane extends Pane {
         }
 
         // convert cells to index arrays for cheap drawing
-        for (Polygon3D cell : sphericalVoronoi.getVoronoiCells()) {
+        for (Polygon3D cell : cells) {
             List<Point3D> point3ds = cell.getPoints();
             int[] pointIndexes = new int[point3ds.size()];
             // loop through each each point to get the corresponding ID
