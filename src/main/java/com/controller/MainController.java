@@ -3,7 +3,7 @@ package com.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.model.Voronoi.SphericalVoronoi;
+import com.model.Voronoi.Voronoi3DGraph;
 import com.view.Renderer3DPane;
 
 import javafx.animation.AnimationTimer;
@@ -69,7 +69,7 @@ public class MainController {
 
     @FXML
     private void reloadGraph() {
-        rendererPane.initialize(new SphericalVoronoi());
+        rendererPane.initialize(new Voronoi3DGraph());
     }
 
     private void handleKeys() {

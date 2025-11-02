@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import com.model.Graph3D.Point3D;
 import com.model.Graph3D.Polygon3D;
 import com.model.Util.Util;
-import com.model.Voronoi.SphericalVoronoi;
+import com.model.Voronoi.Voronoi3DGraph;
 
 import javafx.application.Platform;
 // import javafx.geometry.Bounds;
@@ -31,7 +31,7 @@ public class Renderer3DPane extends Pane {
     private double[] zOrderArr;
 
     // graph
-    SphericalVoronoi sphericalVoronoi;
+    Voronoi3DGraph sphericalVoronoi;
     // location of camera in the worldspace
     Point3D cameraPosition = new Point3D(0,0,4);
     // location the camera is looking at
@@ -49,10 +49,10 @@ public class Renderer3DPane extends Pane {
     public Renderer3DPane() {
         super();
         getChildren().add(canvas);
-        initialize(new SphericalVoronoi());
+        initialize(new Voronoi3DGraph());
     }
 
-    public void initialize(SphericalVoronoi sphericalVoronoi) {
+    public void initialize(Voronoi3DGraph sphericalVoronoi) {
         updateCameraCoords();
         // set graph
         this.sphericalVoronoi = sphericalVoronoi;

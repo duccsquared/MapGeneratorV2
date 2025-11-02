@@ -19,7 +19,7 @@ import com.model.Graph3D.Triangle3D;
 import com.model.Util.EdgeKey;
 import com.model.Util.Util;
 
-public class SphericalVoronoi {
+public class Voronoi3DGraph {
 
     // --- Convert Lat/Lon to Cartesian ---
     static Point3D latLonToCartesian(double latDeg, double lonDeg) {
@@ -122,7 +122,7 @@ public class SphericalVoronoi {
         return cells;
     }
 
-    public SphericalVoronoi() {
+    public Voronoi3DGraph() {
         this.calculateVoronoi();
     }
 
