@@ -7,7 +7,8 @@ import java.util.stream.IntStream;
 import com.model.Graph3D.Point3D;
 import com.model.Graph3D.Polygon3D;
 import com.model.Util.Util;
-import com.model.Voronoi.Voronoi3DGraph;
+import com.view.colours.RandomColourPicker;
+import com.view.colours.RendererColourPicker;
 
 import javafx.application.Platform;
 // import javafx.geometry.Bounds;
@@ -18,6 +19,7 @@ import javafx.scene.paint.Color;
 
 public class Renderer3DPane extends Pane {
     private final Canvas canvas = new Canvas();
+    RendererColourPicker rendererColourPicker = new RandomColourPicker();
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -50,8 +52,6 @@ public class Renderer3DPane extends Pane {
     public Renderer3DPane() {
         super();
         getChildren().add(canvas);
-        Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
-        initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
     }
 
     public void initialize(List<Point3D> points, List<Polygon3D> cells) {
@@ -112,6 +112,9 @@ public class Renderer3DPane extends Pane {
     }
     public void setYaw(double yaw) {
         this.yaw = yaw;
+    }
+    public void setRendererColourPicker(RendererColourPicker rendererColourPicker) {
+        this.rendererColourPicker = rendererColourPicker;
     }
 
     public void updateAll() {
@@ -192,7 +195,7 @@ public class Renderer3DPane extends Pane {
                 // random color per cell
                 // gc.setFill(Color.hsb((cellIndex * 47) % 360, 0.4, 0.95, 1.0));
                 if(!cellIndexColorMap.containsKey(cellIndex)) {
-                    cellIndexColorMap.put(cellIndex, Color.color(Math.random(), Math.random(), Math.random(), 1));
+                    cellIndexColorMap.put(cellIndex, rendererColourPicker.getPolygonColor(cells.get(cellIndex)));
                 }
                 gc.setFill(cellIndexColorMap.get(cellIndex));
                 gc.fillPolygon(xs, ys, xs.length);
@@ -207,7 +210,7 @@ public class Renderer3DPane extends Pane {
                     if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
                     final int r = 3;
                     if(!pointIndexColorMap.containsKey(pointIndex)) {
-                        pointIndexColorMap.put(pointIndex, Color.color(Math.random()/3, Math.random()/3, Math.random()/3, 1));
+                        pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
                     }
                     gc.setFill(pointIndexColorMap.get(pointIndex));
                     gc.fillOval(x - r, y - r, 2*r, 2*r);

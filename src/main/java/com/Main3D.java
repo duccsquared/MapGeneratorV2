@@ -19,7 +19,7 @@ public class Main3D extends Application {
         // scene
         Scene scene = new Scene(loader.load(), 600, 400);
         MainController controller = loader.getController();
-        controller.initializeKeyTracking(scene);
+        controller.init(scene);
         stage.setScene(scene);
         stage.setTitle("JavaFX App");
         stage.show();
