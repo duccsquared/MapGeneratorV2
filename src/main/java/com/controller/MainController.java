@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.model.Voronoi.Voronoi3DGraph;
 import com.view.Renderer3DPane;
-import com.view.colours.RandomColourPicker;
+import com.view.colours.*;
 
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -22,7 +22,7 @@ public class MainController {
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
     public void init(Scene scene) {
-        rendererPane.setRendererColourPicker(new RandomColourPicker());
+        rendererPane.setRendererColourPicker(new CustomColourPicker());
         Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
         rendererPane.initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
         this.initializeKeyTracking(scene);
