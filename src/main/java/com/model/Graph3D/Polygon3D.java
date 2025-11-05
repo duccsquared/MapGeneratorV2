@@ -68,6 +68,10 @@ public class Polygon3D {
         this.delete(false, false);
     }
 
+    public AdjacentPolygon3DIterable adjacentIterator() {
+        return new AdjacentPolygon3DIterable(this);
+    }
+
     static private List<Edge3D> calculateEdgesByVertices(List<Point3D> vertices) {
         List<Edge3D> edges = new ArrayList<>();
         for(Point3D vertex: vertices) {

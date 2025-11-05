@@ -34,7 +34,7 @@ public class Renderer3DPane extends Pane {
 
     // graph
     List<Point3D> points;
-    List<Polygon3D> cells;
+    List<? extends Polygon3D> cells;
     // location of camera in the worldspace
     Point3D cameraPosition = new Point3D(0,0,4);
     // location the camera is looking at
@@ -54,7 +54,7 @@ public class Renderer3DPane extends Pane {
         getChildren().add(canvas);
     }
 
-    public void initialize(List<Point3D> points, List<Polygon3D> cells) {
+    public void initialize(List<Point3D> points, List<? extends Polygon3D> cells) {
         updateCameraCoords();
         // set graph
         this.points = points;

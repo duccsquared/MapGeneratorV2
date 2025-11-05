@@ -3,7 +3,7 @@ package com.controller;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.model.Voronoi.Voronoi3DGraph;
+import com.model.MapGenerator.MapGenerator;
 import com.view.Renderer3DPane;
 import com.view.colours.*;
 
@@ -22,9 +22,10 @@ public class MainController {
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
     public void init(Scene scene) {
-        rendererPane.setRendererColourPicker(new CustomColourPicker());
-        Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
-        rendererPane.initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
+        rendererPane.setRendererColourPicker(new AltitudeColourPicker());
+        MapGenerator mapGenerator = new MapGenerator();
+        mapGenerator.calculateAltitudeMap();
+        rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
         this.initializeKeyTracking(scene);
     }
 
@@ -76,8 +77,9 @@ public class MainController {
 
     @FXML
     private void reloadGraph() {
-        Voronoi3DGraph voronoi3dGraph = new Voronoi3DGraph();
-        rendererPane.initialize(voronoi3dGraph.getVoronoiPoints(),voronoi3dGraph.getVoronoiCells());
+        MapGenerator mapGenerator = new MapGenerator();
+        mapGenerator.calculateAltitudeMap();
+        rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
     }
 
     private void handleKeys() {

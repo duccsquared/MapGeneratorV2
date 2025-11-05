@@ -1,9 +1,7 @@
 package com.model.Graph3D;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import com.model.Util.EdgeKey;
 import com.model.Util.OrderedUniqueList;
@@ -33,6 +31,16 @@ public class Edge3D {
         // loop through points; return other point
         for(Point3D p: this.points) {
             if(point!=p) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public Polygon3D other(Polygon3D polygon) {
+        // loop through polygons; return other polygon
+        for(Polygon3D p: this.polygons) {
+            if(polygon!=p) {
                 return p;
             }
         }

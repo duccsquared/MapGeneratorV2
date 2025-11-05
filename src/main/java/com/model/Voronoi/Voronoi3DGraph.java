@@ -11,28 +11,33 @@ import java.util.Set;
 import com.model.Graph2D.Edge;
 import com.model.Graph2D.Point;
 import com.model.Graph2D.Triangle;
+import com.model.Graph3D.CellFactory;
 import com.model.Graph3D.Circumsphere;
 import com.model.Graph3D.Edge3D;
 import com.model.Graph3D.Point3D;
+import com.model.Graph3D.PointFactory;
 import com.model.Graph3D.Polygon3D;
 import com.model.Graph3D.Triangle3D;
 import com.model.Util.EdgeKey;
 import com.model.Util.Util;
 
-public class Voronoi3DGraph {
+public class Voronoi3DGraph<P extends Point3D, C extends Polygon3D> {
 
     // --- data ---
+    private PointFactory<P> pointFactory;
+    private CellFactory<C> cellFactory;
+
     private List<Triangle3D> triangles = new ArrayList<>();
     private List<Point3D> delaunayPoints = new ArrayList<>();
-    private List<Polygon3D> voronoiCells = new ArrayList<>();
+    private List<C> voronoiCells = new ArrayList<>();
     private List<Edge3D> voronoiEdges = new ArrayList<>();
-    private List<Point3D> voronoiPoints = new ArrayList<>();
+    private List<P> voronoiPoints = new ArrayList<>();
 
     public List<Triangle3D> getTriangles() {return triangles;}
     public List<Point3D> getDelaunayPoints() {return delaunayPoints;}
-    public List<Polygon3D> getVoronoiCells() {return voronoiCells;}
+    public List<C> getVoronoiCells() {return voronoiCells;}
     public List<Edge3D> getVoronoiEdges() {return voronoiEdges;}
-    public List<Point3D> getVoronoiPoints() {return voronoiPoints;}
+    public List<P> getVoronoiPoints() {return voronoiPoints;}
 
     // --- Convert Lat/Lon to Cartesian ---
     static Point3D latLonToCartesian(double latDeg, double lonDeg) {
@@ -108,8 +113,16 @@ public class Voronoi3DGraph {
         return sorted;
     }
 
-    public Voronoi3DGraph() {
+    public Voronoi3DGraph(PointFactory<P> pointFactory, CellFactory<C> cellFactory) {
+        this.pointFactory = pointFactory;
+        this.cellFactory = cellFactory;
         this.calculateVoronoi();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Voronoi3DGraph() {
+        this((x, y, z) -> (P) new Point3D(x, y, z),
+            (x, y) -> (C) new Polygon3D(x,y));
     }
 
     public void calculateVoronoi() {
@@ -122,7 +135,7 @@ public class Voronoi3DGraph {
         // }
 
         double goldenRatio = (1 + Math.pow(5,0.5))/2.0;
-        double n = 200;
+        double n = 500;
         double u = 0;
         double v = 0.98;
         for (int i = 0; i < n; i++) {
@@ -241,17 +254,22 @@ public class Voronoi3DGraph {
         }
 
         // --- 6. calculate circumcircles for all triangles ---
-        ArrayList<Point3D> voronoiPoints = new ArrayList<>();
+        ArrayList<P> voronoiPoints = new ArrayList<>();
         for (Triangle3D triangle : delaunayTriangles) {
             if (triangle.getCenter() == null) {
                 Circumsphere circumsphere = new Circumsphere(triangle);
-                triangle.setCenter(circumsphere.getSphericalCenter());
+                P point = this.pointFactory.create(circumsphere.getSphericalCenter().getX(), circumsphere.getSphericalCenter().getY(), circumsphere.getSphericalCenter().getZ());
+                triangle.setCenter(point);
+                voronoiPoints.add(point);
             }
-            voronoiPoints.add(triangle.getCenter());
+            else {
+                throw new IllegalStateException("Triangle centers should be null");
+            }
+            
         }
 
         // --- 7. create Voronoi edges ---
-        List<Polygon3D> cells = new ArrayList<>();
+        List<C> cells = new ArrayList<>();
         for (Point3D point : pointList) {
             // cell variables
             Set<Point3D> cellpointList = new HashSet<>();
@@ -274,8 +292,8 @@ public class Voronoi3DGraph {
                 }
             }
 
-            Polygon3D voronoiCell = new Polygon3D(new ArrayList<>(sortAroundSite(point, cellpointList)),
-                    new ArrayList<>(cellEdgeMap.values()));
+            C voronoiCell = this.cellFactory.create(new ArrayList<Point3D>(sortAroundSite(point, cellpointList)),
+                    new ArrayList<Edge3D>(cellEdgeMap.values()));
             cells.add(voronoiCell);
 
         }
@@ -315,10 +333,7 @@ public class Voronoi3DGraph {
         this.triangles = delaunayTriangles;
         this.delaunayPoints = new ArrayList<>();
         this.delaunayPoints.addAll(pointList);
-        this.voronoiPoints = new ArrayList<>();
-        for (Triangle3D tri : delaunayTriangles) {
-            this.voronoiPoints.add(tri.getCenter());
-        }
+        this.voronoiPoints = voronoiPoints;
         this.voronoiCells.addAll(cells);
     }
 }
