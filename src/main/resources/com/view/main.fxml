@@ -2,17 +2,22 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import com.view.Renderer3DPane?>
-
+<?import com.view.Renderer2DProjection?>
 
 <SplitPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.controller.MainController"
             dividerPositions="0.6">
     <items>
-        <Renderer3DPane fx:id="rendererPane"/>
+        <AnchorPane>
+            <Renderer3DPane fx:id="rendererPane" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+            <Renderer2DProjection fx:id="projectionPane" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+        </AnchorPane>
         <VBox spacing="10" alignment="CENTER">
             <Label text="Placeholder Section"/>
             <Label text="Status: Ready" fx:id="statusLabel" />
             <Button text="Reload" onAction="#reloadGraph"/>
+            <Button text="3D View" onAction="#view3DPane"/>
+            <Button text="2D View" onAction="#view2DPane"/>
         </VBox>
     </items>
 </SplitPane>
