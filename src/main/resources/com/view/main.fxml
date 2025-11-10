@@ -18,6 +18,8 @@
             <Button text="Reload" onAction="#reloadGraph"/>
             <Button text="3D View" onAction="#view3DPane"/>
             <Button text="2D View" onAction="#view2DPane"/>
+            <!-- dropdown -->
+            <ComboBox fx:id="projectionComboBox" promptText="Select Projection" onAction="#changeProjection"/>
         </VBox>
     </items>
 </SplitPane>

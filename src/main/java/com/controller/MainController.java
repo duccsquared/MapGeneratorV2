@@ -7,10 +7,17 @@ import com.model.MapGenerator.MapGenerator;
 import com.view.Renderer2DProjection;
 import com.view.Renderer3DPane;
 import com.view.colours.*;
+import com.view.mapProjections.EquirectangularProjection;
+import com.view.mapProjections.GallPetersProjection;
+import com.view.mapProjections.LambertProjection;
+import com.view.mapProjections.MercatorProjection;
+import com.view.mapProjections.MillerProjection;
+import com.view.mapProjections.SinusoidalProjection;
 
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -20,10 +27,14 @@ public class MainController {
     @FXML private Renderer3DPane rendererPane;
     @FXML private Renderer2DProjection projectionPane;
     @FXML private Label statusLabel;
+    @FXML private ComboBox<String> projectionComboBox;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
     public void init(Scene scene) {
+
+        projectionComboBox.getItems().setAll("Equirectangular","Mercator","Miller","Lambert","Gall-Peters","Sinusoidal");
+
         projectionPane.setVisible(false);
         rendererPane.setVisible(true);
 
@@ -89,24 +100,6 @@ public class MainController {
     }
 
     @FXML
-    private void rotateLeft() {
-        rendererPane.setYaw(rendererPane.getYaw()-0.025);
-        projectionPane.setYaw(projectionPane.getYaw()-0.025);
-        statusLabel.setText("Rotated left");
-        rendererPane.updateAll();
-        projectionPane.updateAll();
-    }
-
-    @FXML
-    private void rotateRight() {
-        rendererPane.setYaw(rendererPane.getYaw()+0.025);
-        projectionPane.setYaw(projectionPane.getYaw()+0.025);
-        statusLabel.setText("Rotated right");
-        rendererPane.updateAll();
-        projectionPane.updateAll();
-    }
-
-    @FXML
     private void reloadGraph() {
         MapGenerator mapGenerator = new MapGenerator();
         mapGenerator.calculateAltitudeMap();
@@ -124,6 +117,29 @@ public class MainController {
     private void view3DPane() {
         projectionPane.setVisible(false);
         rendererPane.setVisible(true);
+    }
+
+    @FXML
+    private void changeProjection() {
+        System.out.println(projectionComboBox.getValue());
+        if(projectionComboBox.getValue()=="Equirectangular") {
+            projectionPane.setMapProjection(new EquirectangularProjection());
+        }
+        else if(projectionComboBox.getValue()=="Mercator") {
+            projectionPane.setMapProjection(new MercatorProjection());
+        }
+        else if(projectionComboBox.getValue()=="Miller") {
+            projectionPane.setMapProjection(new MillerProjection());
+        }
+        else if(projectionComboBox.getValue()=="Lambert") {
+            projectionPane.setMapProjection(new LambertProjection());
+        }
+        else if(projectionComboBox.getValue()=="Gall-Peters") {
+            projectionPane.setMapProjection(new GallPetersProjection());
+        }
+        else if(projectionComboBox.getValue()=="Sinusoidal") {
+            projectionPane.setMapProjection(new SinusoidalProjection());
+        }
     }
 
     private void handleKeys() {

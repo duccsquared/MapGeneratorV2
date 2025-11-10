@@ -12,6 +12,8 @@ import com.model.Graph3D.Point3D;
 import com.model.Graph3D.Polygon3D;
 import com.view.colours.RandomColourPicker;
 import com.view.colours.RendererColourPicker;
+import com.view.mapProjections.EquirectangularProjection;
+import com.view.mapProjections.MapProjection;
 
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
@@ -22,6 +24,7 @@ import javafx.scene.paint.Color;
 public class Renderer2DProjection extends Pane {
     private final Canvas canvas = new Canvas();
     RendererColourPicker rendererColourPicker = new RandomColourPicker();
+    MapProjection mapProjection = new EquirectangularProjection();
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -32,6 +35,8 @@ public class Renderer2DProjection extends Pane {
     // arrays for projected results (x,y)
     private double[] projX;
     private double[] projY;
+    private double[] longitudes;
+    private double[] latitudes;
 
     // graph
     List<Point3D> points;
@@ -64,6 +69,8 @@ public class Renderer2DProjection extends Pane {
         int n = pointsArray.length;
         projX = new double[n];
         projY = new double[n];
+        latitudes = new double[n];
+        longitudes = new double[n];
 
         for (int i = 0; i < n; i++) {
             pointIndexMap.put(pointsArray[i], i);
@@ -103,6 +110,10 @@ public class Renderer2DProjection extends Pane {
     public void setRendererColourPicker(RendererColourPicker rendererColourPicker) {
         this.rendererColourPicker = rendererColourPicker;
     }
+    public void setMapProjection(MapProjection mapProjection) {
+        this.mapProjection = mapProjection;
+        this.updateAll();
+    }
 
     public void updateAll() {
         // compute viewport
@@ -126,8 +137,8 @@ public class Renderer2DProjection extends Pane {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             // Clear
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-
+            gc.setFill(Color.color(245/255.0, 245/255.0, 244/255.0));
+            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
             boolean[] drawn = new boolean[pointsArray.length];
             for (int cellIndex = 0; cellIndex < cells.size(); cellIndex++) {
                 int[] pointIndexes = cellPointIndexLists.get(cellIndex);
@@ -141,15 +152,15 @@ public class Renderer2DProjection extends Pane {
 
 
                 // get difference between leftmost and rightmost point
-                double minX = 999999;
-                double maxX = 0;
+                double minX = Math.PI;
+                double maxX = -Math.PI;
                 for(int pointIndex : pointIndexes) {
-                    minX = Math.min(minX,projX[pointIndex]);
-                    maxX = Math.max(maxX,projX[pointIndex]);
+                    minX = Math.min(minX,longitudes[pointIndex]);
+                    maxX = Math.max(maxX,longitudes[pointIndex]);
                 }
 
                 // determine if the polygon was split by the 2D map's edges (wraparound)
-                if(maxX - minX > viewport[2]/2) {
+                if(maxX - minX > Math.PI) {
                     // draw polygons for the left edge and the right edge
                     drawPolygon(gc,cellIndex,valid,pointIndexes,viewport,true,false);
                     drawPolygon(gc,cellIndex,valid,pointIndexes,viewport,false,true);
@@ -174,6 +185,55 @@ public class Renderer2DProjection extends Pane {
                     drawn[pointIndex] = true;
                 }
             }
+
+            // After drawing all polygons, clear out outlying areas 
+            gc.setFill(Color.color(245/255.0, 245/255.0, 244/255.0));
+            gc.beginPath();
+
+            // crop extraneous left side
+            int steps = 180;
+            for (int i = 0; i <= steps; i++) {
+                double phi = -Math.PI/2 + i * Math.PI/steps;
+                double lambda = -Math.PI;
+
+                // run projection
+                double u = mapProjection.getX(phi,lambda);
+                double v = mapProjection.getY(phi,lambda); 
+                
+                // normalize to screen size
+                u = viewport[0] + (u * viewport[2]);
+                v = viewport[1] + ((1 - v)/2 * viewport[2]);
+                if(i==0) {
+                    // first step
+                    gc.moveTo(u, v);
+                }
+                gc.lineTo(u, v);
+            }
+            gc.lineTo(0, 0);
+            gc.lineTo(0, canvas.getHeight());
+            gc.closePath();
+            gc.fill();
+
+            // crop extraneous right side
+            gc.setFill(Color.color(245/255.0, 245/255.0, 244/255.0));
+            gc.beginPath();
+            for (int i = 0; i <= steps; i++) {
+                double phi = Math.PI/2 - i * Math.PI/steps;
+                double lambda = Math.PI;
+
+                // run projection
+                double u = mapProjection.getX(phi,lambda);
+                double v = mapProjection.getY(phi,lambda);
+                
+                // normalize to screen size
+                u = viewport[0] + (u * viewport[2]);
+                v = viewport[1] + ((1 - v)/2 * viewport[2]);
+                gc.lineTo(u, v);
+            }
+            gc.lineTo(canvas.getWidth(), canvas.getHeight());
+            gc.lineTo(canvas.getWidth(), 0);
+            gc.closePath();
+            gc.fill();
         });
     }
 
@@ -183,11 +243,11 @@ public class Renderer2DProjection extends Pane {
         int p = 0;
         for (int pointIndex : pointIndexes) {
             if (pointIndex < 0) continue;
-            if(leftSide && projX[pointIndex] > viewport[0] + (viewport[2]/2)) {
-                xs[p] = viewport[0];
+            if(leftSide && longitudes[pointIndex] > 0) {
+                xs[p] = projX[pointIndex] - (mapProjection.getLongitudinalDistance(latitudes[pointIndex]) * viewport[2]);
             }
-            else if(rightSide && projX[pointIndex] < viewport[0] + (viewport[2]/2)) {
-                xs[p] = viewport[0] + viewport[2];
+            else if(rightSide && longitudes[pointIndex] < 0) {
+                xs[p] = projX[pointIndex] + (mapProjection.getLongitudinalDistance(latitudes[pointIndex]) * viewport[2]);
             }
             else {
                 xs[p] = projX[pointIndex];
@@ -215,14 +275,18 @@ public class Renderer2DProjection extends Pane {
         if (r == 0) throw new IllegalArgumentException("zero vector");
         x /= r; y /= r; z /= r;
 
-
+        // calculate latitude and longitude
         double phi = Math.asin(y); // latitude
         double lambda = Math.atan2(z, x);
         double lambdaRel = wrapPi(lambda - this.yaw);
 
-        // normalize to [0,1]
-        double u = (lambdaRel + Math.PI) / (2*Math.PI);  
-        double v = (Math.PI/2 - phi) / Math.PI;  
+        // keep track of latlong coords
+        latitudes[pointIndex] = phi;
+        longitudes[pointIndex] = lambdaRel;
+
+        // run projection [0, 1]
+        double u = mapProjection.getX(phi,lambdaRel);
+        double v = mapProjection.getY(phi,lambdaRel);
         
         // normalize to screen size
         projX[pointIndex] = viewport[0] + (u * viewport[2]);
