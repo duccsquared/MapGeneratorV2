@@ -56,7 +56,7 @@ public class MainController {
             private long lastUpdate = 0;
             @Override
             public void handle(long now) {
-                if (now - lastUpdate >= 8_000_000) { // ~30 FPS
+                if (now - lastUpdate >= 16_000_000) {
                     handleKeys();
                     lastUpdate = now;
                 }
@@ -146,24 +146,24 @@ public class MainController {
         boolean sphereMoved = false;
 
         if (pressedKeys.contains(KeyCode.LEFT)) {
-            rendererPane.setYaw(rendererPane.getYaw()-0.025);
-            projectionPane.setYaw(projectionPane.getYaw()-0.025);
+            rendererPane.setYaw(rendererPane.getYaw()-0.05);
+            projectionPane.setYaw(projectionPane.getYaw()-0.05);
             statusLabel.setText("Rotated left");
             sphereMoved = true;
         }
         if (pressedKeys.contains(KeyCode.RIGHT)) {
-            rendererPane.setYaw(rendererPane.getYaw()+0.025);
-            projectionPane.setYaw(projectionPane.getYaw()+0.025);
+            rendererPane.setYaw(rendererPane.getYaw()+0.05);
+            projectionPane.setYaw(projectionPane.getYaw()+0.05);
             statusLabel.setText("Rotated right");
             sphereMoved = true;
         }
         if (pressedKeys.contains(KeyCode.UP)) {
-            rendererPane.setPitch(rendererPane.getPitch()+0.025);
+            rendererPane.setPitch(rendererPane.getPitch()+0.05);
             statusLabel.setText("Rotated up");
             sphereMoved = true;
         }
         if (pressedKeys.contains(KeyCode.DOWN)) {
-            rendererPane.setPitch(rendererPane.getPitch()-0.025);
+            rendererPane.setPitch(rendererPane.getPitch()-0.05);
             statusLabel.setText("Rotated down");
             sphereMoved = true;
         }
