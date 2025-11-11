@@ -137,10 +137,12 @@ public class Voronoi3DGraph<P extends Point3D, C extends Polygon3D> {
         double goldenRatio = (1 + Math.pow(5,0.5))/2.0;
         double n = 500;
         double u = 0;
-        double v = 0.98;
+        double maxLat = (n - 2)/n;
+        double v = maxLat;
+        double jitterScale = 0.5 / Math.sqrt(n);
         for (int i = 0; i < n; i++) {
-            samplePoints.add(Util.getPointByLatLong(u + 3*Util.randRange(-0.98/n, 0.98/n), v + 3*Util.randRange(-0.98/n, 0.98/n)));
-            v -= 0.98/n;
+            samplePoints.add(Util.getPointByLatLong(u + Util.randRange(-jitterScale, jitterScale), v + Util.randRange(-jitterScale, jitterScale)));
+            v -= maxLat/n;
             u += 1/goldenRatio;
             if (u > 1) {
                 u -= 1;
