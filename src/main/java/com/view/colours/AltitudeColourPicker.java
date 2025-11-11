@@ -25,7 +25,7 @@ public class AltitudeColourPicker extends RendererColourPicker {
             double altitude = mapPolygon.getAltitude();
             double brightnessMultiplier = (altitude + 100)/200;
             double[] latLong = cartesianToLatLon(cell.getPoints().get(0));
-            if(altitude > -20 && (latLong[0] < 0.15 || latLong[0] > 0.85)) {
+            if(altitude > -40 && (latLong[0] < 1/18.0 || latLong[0] > 17/18.0)) {
                 return Color.color(1*brightnessMultiplier, 1*brightnessMultiplier, 1*brightnessMultiplier, 1);
             }
             else if(altitude>0) {
