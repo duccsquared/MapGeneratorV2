@@ -33,7 +33,7 @@ public class CustomColourPicker extends RendererColourPicker {
 
     @Override
     public Color getPolygonColor(Polygon3D cell) {
-        double[] latLong = cartesianToLatLon(cell.getPoints().get(0));
+        double[] latLong = cartesianToLatLon(cell.getCenter());
         return Color.color(latLong[0], 0, latLong[1], 1);
     }
 }

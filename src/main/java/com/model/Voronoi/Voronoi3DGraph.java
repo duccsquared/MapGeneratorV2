@@ -296,6 +296,7 @@ public class Voronoi3DGraph<P extends Point3D, C extends Polygon3D> {
 
             C voronoiCell = this.cellFactory.create(new ArrayList<Point3D>(sortAroundSite(point, cellpointList)),
                     new ArrayList<Edge3D>(cellEdgeMap.values()));
+            voronoiCell.setCenter(point);
             cells.add(voronoiCell);
 
         }

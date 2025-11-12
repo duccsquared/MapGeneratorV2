@@ -41,7 +41,7 @@ public class MapGenerator {
         LayeredPerlinNoise3D perlinNoise = new LayeredPerlinNoise3D(2, 4, 4);
 
         for(MapPolygon mapPolygon: this.graph.getVoronoiCells()) {
-            Point3D point = mapPolygon.getPoints().get(0);
+            Point3D point = mapPolygon.getCenter();
             mapPolygon.setAltitude(95 * perlinNoise.getNoiseValue(point.getX(), point.getY(), point.getZ()) - 5);
         }
     }
