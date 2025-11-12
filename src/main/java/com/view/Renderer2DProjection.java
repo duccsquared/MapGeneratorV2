@@ -170,20 +170,20 @@ public class Renderer2DProjection extends Pane {
                     drawPolygon(gc,cellIndex,valid,pointIndexes,viewport,false,false);
                 }
 
-                // draw points comprising the cell
-                for (int pointIndex : pointIndexes) {
-                    // if (pointIndex < 0 || drawn[pointIndex]) continue;
-                    double x = projX[pointIndex];
-                    double y = projY[pointIndex];
-                    if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
-                    final int r = 3;
-                    if(!pointIndexColorMap.containsKey(pointIndex)) {
-                        pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
-                    }
-                    gc.setFill(pointIndexColorMap.get(pointIndex));
-                    gc.fillOval(x - r, y - r, 2*r, 2*r);
-                    drawn[pointIndex] = true;
-                }
+                // // draw points comprising the cell
+                // for (int pointIndex : pointIndexes) {
+                //     // if (pointIndex < 0 || drawn[pointIndex]) continue;
+                //     double x = projX[pointIndex];
+                //     double y = projY[pointIndex];
+                //     if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
+                //     final int r = 3;
+                //     if(!pointIndexColorMap.containsKey(pointIndex)) {
+                //         pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
+                //     }
+                //     gc.setFill(pointIndexColorMap.get(pointIndex));
+                //     gc.fillOval(x - r, y - r, 2*r, 2*r);
+                //     drawn[pointIndex] = true;
+                // }
             }
 
             // After drawing all polygons, clear out outlying areas 

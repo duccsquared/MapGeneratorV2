@@ -202,20 +202,20 @@ public class Renderer3DPane extends Pane {
                 gc.setStroke(Color.BLACK);
                 gc.strokePolygon(xs, ys, xs.length);
 
-                // draw points comprising the cell
-                for (int pointIndex : pointIndexes) {
-                    // if (pointIndex < 0 || drawn[pointIndex]) continue;
-                    double x = projX[pointIndex];
-                    double y = projY[pointIndex];
-                    if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
-                    final int r = 3;
-                    if(!pointIndexColorMap.containsKey(pointIndex)) {
-                        pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
-                    }
-                    gc.setFill(pointIndexColorMap.get(pointIndex));
-                    gc.fillOval(x - r, y - r, 2*r, 2*r);
-                    drawn[pointIndex] = true;
-                }
+                // // draw points comprising the cell
+                // for (int pointIndex : pointIndexes) {
+                //     // if (pointIndex < 0 || drawn[pointIndex]) continue;
+                //     double x = projX[pointIndex];
+                //     double y = projY[pointIndex];
+                //     if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
+                //     final int r = 3;
+                //     if(!pointIndexColorMap.containsKey(pointIndex)) {
+                //         pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
+                //     }
+                //     gc.setFill(pointIndexColorMap.get(pointIndex));
+                //     gc.fillOval(x - r, y - r, 2*r, 2*r);
+                //     drawn[pointIndex] = true;
+                // }
             }
         });
     }
