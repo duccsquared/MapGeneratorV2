@@ -1,5 +1,7 @@
 package com.model.Noise;
 
+import com.model.Graph3D.Point3D;
+
 public class LayeredPerlinNoise3D {
     private PerlinNoise3D[] perlinNoiseList;
 
@@ -25,5 +27,9 @@ public class LayeredPerlinNoise3D {
         }
 
         return noiseValue / totalAmplitude;
+    }
+
+    public double getNoiseValue(Point3D point) {
+        return getNoiseValue(point.getX(),point.getY(),point.getZ());
     }
 }
