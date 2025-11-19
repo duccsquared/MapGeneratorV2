@@ -13,8 +13,8 @@ import com.model.Voronoi.Voronoi3DGraph;
 public class MapGenerator {
     Voronoi3DGraph<Point3D, MapPolygon> graph;
 
-    public MapGenerator() {
-        this.graph = new Voronoi3DGraph<Point3D, MapPolygon>((x, y, z) -> new Point3D(x, y, z),
+    public MapGenerator(int pointCount) {
+        this.graph = new Voronoi3DGraph<Point3D, MapPolygon>(pointCount, (x, y, z) -> new Point3D(x, y, z),
             (x, y) -> new MapPolygon(x,y));
     }
 

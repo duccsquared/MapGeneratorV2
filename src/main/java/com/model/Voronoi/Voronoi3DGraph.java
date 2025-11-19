@@ -113,19 +113,26 @@ public class Voronoi3DGraph<P extends Point3D, C extends Polygon3D> {
         return sorted;
     }
 
-    public Voronoi3DGraph(PointFactory<P> pointFactory, CellFactory<C> cellFactory) {
+    public Voronoi3DGraph(int pointCount, PointFactory<P> pointFactory, CellFactory<C> cellFactory) {
         this.pointFactory = pointFactory;
         this.cellFactory = cellFactory;
-        this.calculateVoronoi();
+        this.calculateVoronoi(pointCount);
+    }
+
+    public Voronoi3DGraph(PointFactory<P> pointFactory, CellFactory<C> cellFactory) {
+        this(500, pointFactory, cellFactory);
     }
 
     @SuppressWarnings("unchecked")
-    public Voronoi3DGraph() {
-        this((x, y, z) -> (P) new Point3D(x, y, z),
+    public Voronoi3DGraph(int pointCount) {
+        this(pointCount,(x, y, z) -> (P) new Point3D(x, y, z),
             (x, y) -> (C) new Polygon3D(x,y));
     }
 
-    public void calculateVoronoi() {
+    public Voronoi3DGraph() {
+        this(500);
+    }
+    public void calculateVoronoi(int pointCount) {
 
         // --- 1. generate points ---
 
@@ -135,7 +142,7 @@ public class Voronoi3DGraph<P extends Point3D, C extends Polygon3D> {
         // }
 
         double goldenRatio = (1 + Math.pow(5,0.5))/2.0;
-        double n = 500;
+        double n = pointCount;
         double u = 0;
         double maxLat = (n - 2)/n;
         double v = maxLat;

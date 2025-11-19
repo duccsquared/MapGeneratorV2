@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -27,18 +28,33 @@ public class MainController {
     @FXML private Renderer3DPane rendererPane;
     @FXML private Renderer2DProjection projectionPane;
     @FXML private Label statusLabel;
+    @FXML private TextField pointCountField;
     @FXML private ComboBox<String> projectionComboBox;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
+    private int pointCount = 1000;
+
     public void init(Scene scene) {
 
+        pointCountField.setText(String.format("%d",this.pointCount));
+
+        pointCountField.setOnKeyReleased(e -> {
+            try {
+                int newPointCount = Integer.parseInt(pointCountField.getText());
+                if (newPointCount > 0) {
+                    this.pointCount = newPointCount;
+                } 
+            } catch (NumberFormatException err) {
+                statusLabel.setText("Invalid number format.");
+            }
+        });
         projectionComboBox.getItems().setAll("Equirectangular","Mercator","Miller","Lambert","Gall-Peters","Sinusoidal");
 
         projectionPane.setVisible(false);
         rendererPane.setVisible(true);
 
-        MapGenerator mapGenerator = new MapGenerator();
+        MapGenerator mapGenerator = new MapGenerator(this.pointCount);
         mapGenerator.calculateAltitudeMap();
 
         rendererPane.setRendererColourPicker(new AltitudeColourPicker());
@@ -101,7 +117,7 @@ public class MainController {
 
     @FXML
     private void reloadGraph() {
-        MapGenerator mapGenerator = new MapGenerator();
+        MapGenerator mapGenerator = new MapGenerator(this.pointCount);
         mapGenerator.calculateAltitudeMap();
         rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
         projectionPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
@@ -120,6 +136,18 @@ public class MainController {
         rendererPane.setVisible(true);
         rendererPane.updateAll();
     }
+
+    // @FXML
+    // private void updatePointCount() {
+    //     try {
+    //         int newPointCount = Integer.parseInt(pointCountField.getText());
+    //         if (newPointCount > 0) {
+    //             this.pointCount = newPointCount;
+    //         } 
+    //     } catch (NumberFormatException e) {
+    //         statusLabel.setText("Invalid number format.");
+    //     }
+    // }
 
     @FXML
     private void changeProjection() {
