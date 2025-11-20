@@ -20,6 +20,7 @@ import javafx.scene.paint.Color;
 public class Renderer3DPane extends Pane {
     private final Canvas canvas = new Canvas();
     RendererColourPicker rendererColourPicker = new RandomColourPicker();
+    private boolean showPoints = false;
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -116,6 +117,13 @@ public class Renderer3DPane extends Pane {
     public void setRendererColourPicker(RendererColourPicker rendererColourPicker) {
         this.rendererColourPicker = rendererColourPicker;
     }
+    public boolean isShowPoints() {
+        return showPoints;
+    }
+    public void setShowPoints(boolean showPoints) {
+        this.showPoints = showPoints;
+    }
+    
 
     public void updateAll() {
         updateCameraCoords();
@@ -202,20 +210,23 @@ public class Renderer3DPane extends Pane {
                 gc.setStroke(Color.BLACK);
                 gc.strokePolygon(xs, ys, xs.length);
 
-                // // draw points comprising the cell
-                // for (int pointIndex : pointIndexes) {
-                //     // if (pointIndex < 0 || drawn[pointIndex]) continue;
-                //     double x = projX[pointIndex];
-                //     double y = projY[pointIndex];
-                //     if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
-                //     final int r = 3;
-                //     if(!pointIndexColorMap.containsKey(pointIndex)) {
-                //         pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
-                //     }
-                //     gc.setFill(pointIndexColorMap.get(pointIndex));
-                //     gc.fillOval(x - r, y - r, 2*r, 2*r);
-                //     drawn[pointIndex] = true;
-                // }
+                if(this.showPoints) {
+                    // draw points comprising the cell
+                    for (int pointIndex : pointIndexes) {
+                        // if (pointIndex < 0 || drawn[pointIndex]) continue;
+                        double x = projX[pointIndex];
+                        double y = projY[pointIndex];
+                        if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
+                        final int r = 3;
+                        if(!pointIndexColorMap.containsKey(pointIndex)) {
+                            pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
+                        }
+                        gc.setFill(pointIndexColorMap.get(pointIndex));
+                        gc.fillOval(x - r, y - r, 2*r, 2*r);
+                        drawn[pointIndex] = true;
+                    }
+                }
+
             }
         });
     }

@@ -25,6 +25,7 @@ public class Renderer2DProjection extends Pane {
     private final Canvas canvas = new Canvas();
     RendererColourPicker rendererColourPicker = new RandomColourPicker();
     MapProjection mapProjection = new EquirectangularProjection();
+    private boolean showPoints = false;
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -114,6 +115,12 @@ public class Renderer2DProjection extends Pane {
         this.mapProjection = mapProjection;
         this.updateAll();
     }
+    public boolean isShowPoints() {
+        return showPoints;
+    }
+    public void setShowPoints(boolean showPoints) {
+        this.showPoints = showPoints;
+    }
 
     public void updateAll() {
         // compute viewport
@@ -170,20 +177,22 @@ public class Renderer2DProjection extends Pane {
                     drawPolygon(gc,cellIndex,valid,pointIndexes,viewport,false,false);
                 }
 
-                // // draw points comprising the cell
-                // for (int pointIndex : pointIndexes) {
-                //     // if (pointIndex < 0 || drawn[pointIndex]) continue;
-                //     double x = projX[pointIndex];
-                //     double y = projY[pointIndex];
-                //     if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
-                //     final int r = 3;
-                //     if(!pointIndexColorMap.containsKey(pointIndex)) {
-                //         pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
-                //     }
-                //     gc.setFill(pointIndexColorMap.get(pointIndex));
-                //     gc.fillOval(x - r, y - r, 2*r, 2*r);
-                //     drawn[pointIndex] = true;
-                // }
+                if(this.showPoints) {
+                    // draw points comprising the cell
+                    for (int pointIndex : pointIndexes) {
+                        // if (pointIndex < 0 || drawn[pointIndex]) continue;
+                        double x = projX[pointIndex];
+                        double y = projY[pointIndex];
+                        if (!Double.isFinite(x) || !Double.isFinite(y)) continue;
+                        final int r = 3;
+                        if(!pointIndexColorMap.containsKey(pointIndex)) {
+                            pointIndexColorMap.put(pointIndex, rendererColourPicker.getPointColor(points.get(pointIndex)));
+                        }
+                        gc.setFill(pointIndexColorMap.get(pointIndex));
+                        gc.fillOval(x - r, y - r, 2*r, 2*r);
+                        drawn[pointIndex] = true;
+                    }
+                }
             }
 
             // After drawing all polygons, clear out outlying areas 
