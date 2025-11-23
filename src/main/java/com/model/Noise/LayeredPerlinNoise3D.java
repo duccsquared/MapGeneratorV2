@@ -26,7 +26,7 @@ public class LayeredPerlinNoise3D {
             amplitude /= 2;
         }
 
-        return noiseValue / totalAmplitude;
+        return (noiseValue / totalAmplitude) * 2.6;
     }
 
     public double getNoiseValue(Point3D point) {
