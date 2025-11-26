@@ -24,26 +24,12 @@ public class MapGenerator {
     }
 
     public void calculateAltitudeMap() {
-        // for(MapPolygon mapPolygon: this.graph.getVoronoiCells()) {
-        //     mapPolygon.setAltitude(Util.randInt(-100, 80));
-        // }
-        // // normalize between tiles
-        // Collections.shuffle(this.graph.getVoronoiCells());
-        // for(MapPolygon mapPolygon: this.graph.getVoronoiCells()) {
-        //     int i = 1;
-        //     double totalAltitude = 0;
-        //     totalAltitude += mapPolygon.getAltitude();
-        //     for(Polygon3D adj: mapPolygon.adjacentIterator()) {
-        //         MapPolygon mapAdj = (MapPolygon) adj;
-        //         totalAltitude += mapAdj.getAltitude();
-        //         i += 1;
-        //     }
-        //     mapPolygon.setAltitude(totalAltitude/i);
-        // }
+        // generate noise (inputs: range, startFrequency, octaves)
         LayeredPerlinNoise3D perlinNoise = new LayeredPerlinNoise3D(3, 4, 4);
         LayeredPerlinNoise3D perlinNoise2 = new LayeredPerlinNoise3D(3, 1, 4);
         LayeredPerlinNoise3D perlinNoise3 = new LayeredPerlinNoise3D(2, 8, 4);
 
+        // loop through polygons
         for(MapPolygon mapPolygon: this.graph.getVoronoiCells()) {
             Point3D point = mapPolygon.getCenter();
 
@@ -64,15 +50,22 @@ public class MapGenerator {
 
             // mapPolygon.setAltitude(95 * perlinNoise.getNoiseValue(Util.add(point, offsetPoint)) - 5);
 
+            // get continent mask
             double continentMask = smoothstep(0, 0.5, perlinNoise2.getNoiseValue(Util.scale(Util.add(point,Util.scale(offsetPoint,0.4)),0.8)));
 
+            // get land and sea noise
             double landNoise = perlinNoise.getNoiseValue(Util.add(point,Util.scale(offsetPoint2,0.3))) * 0.3 + 0.3;
             double seaNoise = perlinNoise2.getNoiseValue(point) * 0.5 - 0.3;
+
+            // get altitude based on mask
             double altitude = lerp(seaNoise, landNoise, continentMask);
+
+            // apply mountains
             double mountain = 1 - Math.abs(perlinNoise3.getNoiseValue(1.8*point.getX(), 1.8*point.getY(), 1.8*point.getZ()));
             double mountainMask = smoothstep(0.3, 0.4, altitude);
             altitude = altitude + mountain * mountainMask * 0.5;
-            // System.out.println(String.format("%.2f", perlinNoise.getNoiseValue(Util.add(point, Util.scale(offsetPoint,0.3)))));
+            
+            // set altitude
             mapPolygon.setAltitude(altitude);
         }
     }
