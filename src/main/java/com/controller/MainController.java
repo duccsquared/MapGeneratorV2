@@ -58,9 +58,13 @@ public class MainController {
         mapGenerator.calculateAltitudeMap();
 
         rendererPane.setRendererColourPicker(new AltitudeColourPicker());
+        rendererPane.setShowPoints(false);
+        rendererPane.setShowLines(false);
         rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
 
         projectionPane.setRendererColourPicker(new AltitudeColourPicker());
+        projectionPane.setShowPoints(false);
+        projectionPane.setShowLines(false);
         projectionPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
         
         this.initializeKeyTracking(scene);

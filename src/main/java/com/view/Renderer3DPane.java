@@ -21,6 +21,7 @@ public class Renderer3DPane extends Pane {
     private final Canvas canvas = new Canvas();
     RendererColourPicker rendererColourPicker = new RandomColourPicker();
     private boolean showPoints = false;
+    private boolean showLines = true;
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -123,6 +124,12 @@ public class Renderer3DPane extends Pane {
     public void setShowPoints(boolean showPoints) {
         this.showPoints = showPoints;
     }
+    public boolean isShowLines() {
+        return showLines;
+    }
+    public void setShowLines(boolean showLines) {
+        this.showLines = showLines;
+    }
     
 
     public void updateAll() {
@@ -207,8 +214,15 @@ public class Renderer3DPane extends Pane {
                 }
                 gc.setFill(cellIndexColorMap.get(cellIndex));
                 gc.fillPolygon(xs, ys, xs.length);
-                gc.setStroke(Color.BLACK);
-                gc.strokePolygon(xs, ys, xs.length);
+                if(this.showLines) {
+                    gc.setStroke(Color.BLACK);
+                    gc.strokePolygon(xs, ys, xs.length);
+                }
+                else {
+                    gc.setStroke(cellIndexColorMap.get(cellIndex));
+                    gc.strokePolygon(xs, ys, xs.length);
+                }
+
 
                 if(this.showPoints) {
                     // draw points comprising the cell

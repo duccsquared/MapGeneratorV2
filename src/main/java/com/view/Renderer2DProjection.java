@@ -26,6 +26,7 @@ public class Renderer2DProjection extends Pane {
     RendererColourPicker rendererColourPicker = new RandomColourPicker();
     MapProjection mapProjection = new EquirectangularProjection();
     private boolean showPoints = false;
+    private boolean showLines = true;
     // index mapping for fast access
     private Point3D[] pointsArray;
     private Map<Point3D, Integer> pointIndexMap = new HashMap<>();
@@ -121,7 +122,13 @@ public class Renderer2DProjection extends Pane {
     public void setShowPoints(boolean showPoints) {
         this.showPoints = showPoints;
     }
-
+    public boolean isShowLines() {
+        return showLines;
+    }
+    public void setShowLines(boolean showLines) {
+        this.showLines = showLines;
+    }
+    
     public void updateAll() {
         // compute viewport
         double[] viewport = calculateViewport();
@@ -272,8 +279,14 @@ public class Renderer2DProjection extends Pane {
         }
         gc.setFill(cellIndexColorMap.get(cellIndex));
         gc.fillPolygon(xs, ys, xs.length);
-        gc.setStroke(Color.BLACK);
-        gc.strokePolygon(xs, ys, xs.length);
+        if(this.showLines) {
+            gc.setStroke(Color.BLACK);
+            gc.strokePolygon(xs, ys, xs.length);
+        }
+        else {
+            gc.setStroke(cellIndexColorMap.get(cellIndex));
+            gc.strokePolygon(xs, ys, xs.length);
+        }
     }
 
     private void projectPointToArrays(Point3D point3d, double[] viewport, int pointIndex) {
