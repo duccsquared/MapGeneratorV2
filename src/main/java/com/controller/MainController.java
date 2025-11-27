@@ -30,9 +30,11 @@ public class MainController {
     @FXML private Label statusLabel;
     @FXML private TextField pointCountField;
     @FXML private ComboBox<String> projectionComboBox;
+    @FXML private ComboBox<String> viewModeComboBox;
 
     private final Set<KeyCode> pressedKeys = new HashSet<>();
 
+    MapGenerator mapGenerator;
     private int pointCount = 1000;
 
     public void init(Scene scene) {
@@ -50,11 +52,12 @@ public class MainController {
             }
         });
         projectionComboBox.getItems().setAll("Equirectangular","Mercator","Miller","Lambert","Gall-Peters","Sinusoidal");
+        viewModeComboBox.getItems().setAll("Altitude","Continent Mask","Land","Sea","Mountain","Mountain Mask");
 
         projectionPane.setVisible(false);
         rendererPane.setVisible(true);
 
-        MapGenerator mapGenerator = new MapGenerator(this.pointCount);
+        mapGenerator = new MapGenerator(this.pointCount);
         mapGenerator.calculateAltitudeMap();
 
         rendererPane.setRendererColourPicker(new AltitudeColourPicker());
@@ -121,7 +124,7 @@ public class MainController {
 
     @FXML
     private void reloadGraph() {
-        MapGenerator mapGenerator = new MapGenerator(this.pointCount);
+        mapGenerator = new MapGenerator(this.pointCount);
         mapGenerator.calculateAltitudeMap();
         rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
         projectionPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
@@ -174,6 +177,24 @@ public class MainController {
         else if(projectionComboBox.getValue()=="Sinusoidal") {
             projectionPane.setMapProjection(new SinusoidalProjection());
         }
+    }
+
+    @FXML
+    private void changeViewMode() {
+        String value = viewModeComboBox.getValue();
+        RendererColourPicker rendererColourPicker;
+        if(value=="Altitude") {
+            rendererColourPicker = new AltitudeColourPicker();
+        }
+        else {
+            rendererColourPicker = new MapPolygonColourPicker(value);
+        }
+
+        rendererPane.setRendererColourPicker(rendererColourPicker);
+        projectionPane.setRendererColourPicker(rendererColourPicker);
+
+        rendererPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
+        projectionPane.initialize(mapGenerator.getPoints(),mapGenerator.getCells());
     }
 
     private void handleKeys() {

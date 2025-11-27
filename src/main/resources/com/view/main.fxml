@@ -25,6 +25,7 @@
             </HBox>
             <!-- dropdown -->
             <ComboBox fx:id="projectionComboBox" promptText="Select Projection" onAction="#changeProjection"/>
+            <ComboBox fx:id="viewModeComboBox" promptText="View Mode" onAction="#changeViewMode"/>
         </VBox>
     </items>
 </SplitPane>

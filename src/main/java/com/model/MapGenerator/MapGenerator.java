@@ -66,6 +66,11 @@ public class MapGenerator {
             altitude = altitude + mountain * mountainMask * 0.5;
             
             // set altitude
+            mapPolygon.setContinentMask(continentMask);
+            mapPolygon.setLandNoise(landNoise);
+            mapPolygon.setSeaNoise(seaNoise);
+            mapPolygon.setMountain(mountain);
+            mapPolygon.setMountainMask(mountainMask);
             mapPolygon.setAltitude(altitude);
         }
     }
