@@ -10,10 +10,11 @@ public class AltitudeColourPicker extends RendererColourPicker {
 
     // Color stops: elevation, R, G, B
     private static final double[][] COLOR_MAP = {
-        {-1.0,   0,   0, 139},
-        {-0.5,   0, 105, 148},
-        {-0.25,  0, 149, 182},
-        {0.0,  20, 150, 162},
+        {-1.00, 0, 24, 88}, 
+        {-0.60, 0, 88, 144}, 
+        {-0.30, 36, 136, 188},
+        {-0.05, 96, 184, 168}, 
+        { 0.00, 240, 232, 160}, 
         {0.0, 0, 201, 50},
         {0.08, 30, 211, 104},
         {0.15, 95, 224, 116},
@@ -28,7 +29,6 @@ public class AltitudeColourPicker extends RendererColourPicker {
         {0.85, 199, 175, 169},
         {0.92, 219, 205, 202},
         {1.0, 236, 228, 226},
-        
     };
 
     public Color getColor(double altitude) {
