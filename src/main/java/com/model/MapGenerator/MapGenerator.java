@@ -51,7 +51,7 @@ public class MapGenerator {
             // mapPolygon.setAltitude(95 * perlinNoise.getNoiseValue(Util.add(point, offsetPoint)) - 5);
 
             // get continent mask
-            double continentMask = smoothstep(0, 0.5, perlinNoise2.getNoiseValue(Util.scale(Util.add(point,Util.scale(offsetPoint,0.4)),0.8)));
+            double continentMask = smoothstep(0, 0.5, perlinNoise2.getNoiseValue(Util.add(Util.scale(Util.add(point,Util.scale(offsetPoint,0.4)),0.8),new Point3D(-1.1, 0.8, 0.7))));
 
             // get land and sea noise
             double landNoise = perlinNoise.getNoiseValue(Util.add(point,Util.scale(offsetPoint2,0.3))) * 0.3 + 0.3;
